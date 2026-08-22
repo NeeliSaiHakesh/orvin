@@ -1,0 +1,61 @@
+# ──────────────────────────────────────────────
+# AutoMLOps .gitignore
+# ──────────────────────────────────────────────
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+.venv/
+*.egg
+
+# Node
+node_modules/
+.next/
+out/
+.npm
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Docker
+docker-compose.override.yml
+
+# Uploads & Models
+uploads/
+model_registry/
+generated_apis/
+catboost_info/
+*.db
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+coverage/
+
+# Logs
+*.log
+logs/
+
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini

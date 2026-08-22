@@ -1,0 +1,92 @@
+version: '3.9'
+
+services:
+  # ──────────────────────────────────────────────
+  # PostgreSQL Database
+  # ──────────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: automlops-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: automlops
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ──────────────────────────────────────────────
+  # Redis Cache & Queue
+  # ──────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: automlops-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ──────────────────────────────────────────────
+  # FastAPI Backend
+  # ──────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: automlops-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/automlops
+      REDIS_URL: redis://redis:6379
+      SECRET_KEY: automlops-dev-secret-key-change-in-production
+      DEBUG: "true"
+      CORS_ORIGINS: '["http://localhost:3000"]'
+      UPLOAD_DIR: /app/uploads
+      MODEL_REGISTRY_DIR: /app/model_registry
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app/app
+      - ./uploads:/app/uploads
+      - ./model_registry:/app/model_registry
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ──────────────────────────────────────────────
+  # Next.js Frontend
+  # ──────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: automlops-frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:
