@@ -57,6 +57,8 @@ async def health_check():
 async def root():
     return {
         "app": "AutoMLOps API",
-        "version": "1.0.0",
+        "version": "1.0.1",
+        "build": "2026-08-23-production-ready",
+        "status": "healthy",
         "docs": "/docs"
     }
