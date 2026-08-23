@@ -12,6 +12,8 @@ from sklearn.linear_model import LogisticRegression, LinearRegression, Ridge
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, GradientBoostingClassifier, GradientBoostingRegressor
 from sklearn.svm import SVC, SVR
 from sklearn.neural_network import MLPClassifier, MLPRegressor
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
+from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.metrics import (
     accuracy_score, f1_score, precision_score, recall_score,
     roc_auc_score, mean_squared_error, mean_absolute_error, r2_score,
@@ -46,51 +48,54 @@ except Exception:
 
 
 def _get_classification_candidates() -> dict:
-    """Get classification model variations for rapid, responsive training."""
+    """Get classification model variations for ultra-fast, responsive training under 2 seconds."""
     models = {
         'RandomForest': [
-            (RandomForestClassifier(n_estimators=40, max_depth=8, random_state=42, n_jobs=1), {'n_estimators': 40, 'max_depth': 8}),
+            (RandomForestClassifier(n_estimators=25, max_depth=6, random_state=42, n_jobs=-1), {'n_estimators': 25, 'max_depth': 6}),
         ],
         'GradientBoosting': [
-            (GradientBoostingClassifier(n_estimators=40, learning_rate=0.1, max_depth=3, random_state=42), {'n_estimators': 40, 'learning_rate': 0.1}),
+            (GradientBoostingClassifier(n_estimators=25, learning_rate=0.1, max_depth=3, random_state=42), {'n_estimators': 25, 'learning_rate': 0.1}),
+        ],
+        'DecisionTree': [
+            (DecisionTreeClassifier(max_depth=6, random_state=42), {'max_depth': 6, 'criterion': 'gini'}),
         ],
         'LogisticRegression': [
-            (LogisticRegression(C=1.0, max_iter=300, random_state=42), {'C': 1.0, 'solver': 'lbfgs'}),
+            (LogisticRegression(C=1.0, max_iter=150, random_state=42), {'C': 1.0, 'solver': 'lbfgs'}),
         ],
-        'SVM': [
-            (SVC(C=1.0, kernel='rbf', probability=True, random_state=42), {'C': 1.0, 'kernel': 'rbf'}),
-        ],
-        'NeuralNetwork': [
-            (MLPClassifier(hidden_layer_sizes=(32,), max_iter=60, random_state=42, early_stopping=True), {'hidden_layer_sizes': '(32,)', 'activation': 'relu'}),
+        'KNearestNeighbors': [
+            (KNeighborsClassifier(n_neighbors=5), {'n_neighbors': 5, 'weights': 'uniform'}),
         ],
     }
 
     if HAS_XGBOOST:
         models['XGBoost'] = [
-            (XGBClassifier(n_estimators=40, max_depth=3, learning_rate=0.1, eval_metric='logloss', random_state=42, verbosity=0, n_jobs=1), {'n_estimators': 40, 'max_depth': 3, 'learning_rate': 0.1}),
+            (XGBClassifier(n_estimators=25, max_depth=3, learning_rate=0.1, eval_metric='logloss', random_state=42, verbosity=0, n_jobs=-1), {'n_estimators': 25, 'max_depth': 3, 'learning_rate': 0.1}),
         ]
 
     if HAS_LIGHTGBM:
         models['LightGBM'] = [
-            (LGBMClassifier(n_estimators=40, max_depth=4, learning_rate=0.1, random_state=42, verbosity=-1, n_jobs=1), {'n_estimators': 40, 'max_depth': 4, 'learning_rate': 0.1}),
+            (LGBMClassifier(n_estimators=25, max_depth=3, learning_rate=0.1, random_state=42, verbosity=-1, n_jobs=-1), {'n_estimators': 25, 'max_depth': 3, 'learning_rate': 0.1}),
         ]
 
     if HAS_CATBOOST:
         models['CatBoost'] = [
-            (CatBoostClassifier(iterations=20, depth=4, learning_rate=0.1, random_state=42, verbose=0, thread_count=1), {'iterations': 20, 'depth': 4, 'learning_rate': 0.1}),
+            (CatBoostClassifier(iterations=15, depth=3, learning_rate=0.1, random_state=42, verbose=0, thread_count=-1), {'iterations': 15, 'depth': 3, 'learning_rate': 0.1}),
         ]
 
     return models
 
 
 def _get_regression_candidates() -> dict:
-    """Get regression model variations for rapid, responsive training."""
+    """Get regression model variations for ultra-fast, responsive training under 2 seconds."""
     models = {
         'RandomForest': [
-            (RandomForestRegressor(n_estimators=40, max_depth=8, random_state=42, n_jobs=1), {'n_estimators': 40, 'max_depth': 8}),
+            (RandomForestRegressor(n_estimators=25, max_depth=6, random_state=42, n_jobs=-1), {'n_estimators': 25, 'max_depth': 6}),
         ],
         'GradientBoosting': [
-            (GradientBoostingRegressor(n_estimators=40, learning_rate=0.1, max_depth=3, random_state=42), {'n_estimators': 40, 'learning_rate': 0.1}),
+            (GradientBoostingRegressor(n_estimators=25, learning_rate=0.1, max_depth=3, random_state=42), {'n_estimators': 25, 'learning_rate': 0.1}),
+        ],
+        'DecisionTree': [
+            (DecisionTreeRegressor(max_depth=6, random_state=42), {'max_depth': 6}),
         ],
         'Ridge': [
             (Ridge(alpha=1.0, random_state=42), {'alpha': 1.0}),
@@ -98,27 +103,24 @@ def _get_regression_candidates() -> dict:
         'LinearRegression': [
             (LinearRegression(), {'fit_intercept': True}),
         ],
-        'SVR': [
-            (SVR(C=1.0, kernel='rbf'), {'C': 1.0, 'kernel': 'rbf'}),
-        ],
-        'NeuralNetwork': [
-            (MLPRegressor(hidden_layer_sizes=(32,), max_iter=60, random_state=42, early_stopping=True), {'hidden_layer_sizes': '(32,)', 'activation': 'relu'}),
+        'KNearestNeighbors': [
+            (KNeighborsRegressor(n_neighbors=5), {'n_neighbors': 5}),
         ],
     }
 
     if HAS_XGBOOST:
         models['XGBoost'] = [
-            (XGBRegressor(n_estimators=40, max_depth=3, learning_rate=0.1, random_state=42, verbosity=0, n_jobs=1), {'n_estimators': 40, 'max_depth': 3, 'learning_rate': 0.1}),
+            (XGBRegressor(n_estimators=25, max_depth=3, learning_rate=0.1, random_state=42, verbosity=0, n_jobs=-1), {'n_estimators': 25, 'max_depth': 3, 'learning_rate': 0.1}),
         ]
 
     if HAS_LIGHTGBM:
         models['LightGBM'] = [
-            (LGBMRegressor(n_estimators=40, max_depth=4, learning_rate=0.1, random_state=42, verbosity=-1, n_jobs=1), {'n_estimators': 40, 'max_depth': 4, 'learning_rate': 0.1}),
+            (LGBMRegressor(n_estimators=25, max_depth=3, learning_rate=0.1, random_state=42, verbosity=-1, n_jobs=-1), {'n_estimators': 25, 'max_depth': 3, 'learning_rate': 0.1}),
         ]
 
     if HAS_CATBOOST:
         models['CatBoost'] = [
-            (CatBoostRegressor(iterations=20, depth=4, learning_rate=0.1, random_state=42, verbose=0, thread_count=1), {'iterations': 20, 'depth': 4, 'learning_rate': 0.1}),
+            (CatBoostRegressor(iterations=15, depth=3, learning_rate=0.1, random_state=42, verbose=0, thread_count=-1), {'iterations': 15, 'depth': 3, 'learning_rate': 0.1}),
         ]
 
     return models
