@@ -298,4 +298,18 @@ export const api = {
         method: 'POST',
       }),
   },
+
+  // ── Cost & Carbon Optimizer ──
+  costCarbon: {
+    getEstimate: (projectId: string, datasetId?: string) => {
+      const q = datasetId ? `?dataset_id=${encodeURIComponent(datasetId)}` : '';
+      return fetchAPI(`/projects/${projectId}/cost-carbon/estimate${q}`);
+    },
+
+    calculate: (projectId: string, payload: Record<string, any>) =>
+      fetchAPI(`/projects/${projectId}/cost-carbon/calculate`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
+  },
 };

@@ -2,7 +2,7 @@ from fastapi import FastAPI  # type: ignore
 from fastapi.middleware.cors import CORSMiddleware  # type: ignore
 from app.config import settings
 from app.database import init_db
-from app.routers import auth, projects, datasets, analysis, cleaning, features, training, explain, api_gen, assistant, decision, simulator, self_healing
+from app.routers import auth, projects, datasets, analysis, cleaning, features, training, explain, api_gen, assistant, decision, simulator, self_healing, cost_carbon
 
 app = FastAPI(
     title="AutoMLOps Platform API",
@@ -33,6 +33,7 @@ app.include_router(assistant.router, prefix="/api/v1")
 app.include_router(decision.router, prefix="/api/v1")
 app.include_router(simulator.router, prefix="/api/v1")
 app.include_router(self_healing.router, prefix="/api/v1")
+app.include_router(cost_carbon.router, prefix="/api/v1")
 
 @app.on_event("startup")
 async def startup_event():
