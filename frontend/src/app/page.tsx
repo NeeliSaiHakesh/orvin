@@ -3,7 +3,7 @@ import { Activity, BrainCircuit, Database, FileCode2, LineChart, Sparkles, Wand2
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden">
+    <div className="min-h-screen flex flex-col relative overflow-x-clip">
       {/* Background decoration */}
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-purple-900/30 blur-[120px] rounded-full pointer-events-none"></div>
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-cyan-900/30 blur-[120px] rounded-full pointer-events-none"></div>
@@ -29,11 +29,11 @@ export default function LandingPage() {
           </p>
           <div className="flex gap-6 justify-center pt-8">
             <Link href="/auth/register" className="btn-primary text-lg px-8 py-4">Start Building</Link>
-            <Link href="#features" className="btn-secondary text-lg px-8 py-4">Learn More</Link>
+            <a href="#features" className="btn-secondary text-lg px-8 py-4 cursor-pointer">Learn More</a>
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full pt-16" id="features">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full pt-16 scroll-mt-24" id="features">
           {[
             { icon: <Database className="w-8 h-8 text-blue-400" />, title: "Dataset Intelligence", desc: "Automated cleaning and analysis of your data." },
             { icon: <Wand2 className="w-8 h-8 text-purple-400" />, title: "Feature Engineering", desc: "AI-driven feature generation for optimal performance." },
