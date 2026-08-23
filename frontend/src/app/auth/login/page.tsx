@@ -10,14 +10,13 @@ import { useAuthStore } from '@/lib/store';
 import { api } from '@/lib/api';
 
 export default function LoginPage() {
-  const router = useRouter();
   const { login } = useAuthStore();
   const [email, setEmail] = useState('demo@automlops.ai');
   const [password, setPassword] = useState('password123');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async (loginEmail?: string, loginPassword?: string) => {
+  const executeLogin = async (loginEmail?: string, loginPassword?: string) => {
     const finalEmail = (loginEmail || email || 'demo@automlops.ai').trim();
     const finalPassword = (loginPassword || password || 'password123').trim();
     
@@ -27,12 +26,13 @@ export default function LoginPage() {
     try {
       const res = await api.auth.login({ email: finalEmail, password: finalPassword });
       const token = res.access_token || 'demo-token';
-      const userName = finalEmail.split('@')[0] || 'Demo User';
+      const userName = finalEmail.split('@')[0] || 'Engineer';
       login(token, { id: 'user-1', name: userName, email: finalEmail });
       window.location.href = '/dashboard';
-    } catch {
-      // Seamless demo fallback
-      const userName = finalEmail.split('@')[0] || 'Demo User';
+    } catch (err: any) {
+      console.warn("API login notice:", err);
+      // Seamless demo fallback - instant transition
+      const userName = finalEmail.split('@')[0] || 'Demo Engineer';
       login('demo-session-token', { id: 'user-demo', name: userName, email: finalEmail });
       window.location.href = '/dashboard';
     } finally {
@@ -40,15 +40,15 @@ export default function LoginPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    await handleLogin();
+    executeLogin();
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-background">
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-purple-900/20 blur-[120px] rounded-full"></div>
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-cyan-900/20 blur-[120px] rounded-full"></div>
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-purple-900/20 blur-[120px] rounded-full pointer-events-none"></div>
+      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-cyan-900/20 blur-[120px] rounded-full pointer-events-none"></div>
 
       <div className="w-full max-w-md z-10 p-4">
         <div className="text-center mb-8">
@@ -56,7 +56,7 @@ export default function LoginPage() {
             <BrainCircuit className="text-cyan-400 w-8 h-8" />
             <span className="gradient-text">AutoMLOps</span>
           </Link>
-          <p className="text-gray-400">Welcome back! Please login to your account.</p>
+          <p className="text-gray-400">Welcome back! Please sign in to your workspace.</p>
         </div>
 
         {error && (
@@ -94,9 +94,25 @@ export default function LoginPage() {
                 </label>
                 <span className="text-xs text-cyan-400 font-medium">Demo mode enabled</span>
               </div>
-              <Button type="submit" className="w-full" isLoading={loading}>
-                Sign In
-              </Button>
+
+              <div className="space-y-3">
+                <Button 
+                  type="submit" 
+                  className="w-full text-base py-3 cursor-pointer" 
+                  isLoading={loading}
+                  onClick={() => executeLogin()}
+                >
+                  Sign In
+                </Button>
+
+                <button
+                  type="button"
+                  onClick={() => executeLogin('demo@automlops.ai', 'password123')}
+                  className="w-full py-2.5 px-4 rounded-lg bg-white/5 hover:bg-white/10 border border-cyan-500/30 text-cyan-300 text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  Instant Demo Access
+                </button>
+              </div>
             </form>
             
             <div className="mt-6 text-center text-sm text-gray-400">

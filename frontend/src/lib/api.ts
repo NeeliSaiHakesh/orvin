@@ -11,16 +11,18 @@ function getCandidateBaseURLs(): string[] {
   }
   if (typeof window !== 'undefined') {
     const host = window.location.hostname || 'localhost';
-    const urls = [`http://${host}:8000/api/v1`];
-    if (host !== '127.0.0.1') urls.push('http://127.0.0.1:8000/api/v1');
-    if (host !== 'localhost') urls.push('http://localhost:8000/api/v1');
+    // Priority: IPv4 127.0.0.1 first (prevents Windows IPv6 ::1 localhost hang), then localhost
+    const urls: string[] = ['http://127.0.0.1:8000/api/v1', 'http://localhost:8000/api/v1'];
+    if (host !== '127.0.0.1' && host !== 'localhost') {
+      urls.unshift(`http://${host}:8000/api/v1`);
+    }
     return urls;
   }
   return ['http://127.0.0.1:8000/api/v1', 'http://localhost:8000/api/v1'];
 }
 
 /**
- * Core fetch wrapper with auth token, CORS error handling, and resilience.
+ * Core fetch wrapper with auth token, CORS error handling, resilience, and timeout.
  */
 async function fetchAPI(endpoint: string, options: RequestInit = {}): Promise<any> {
   let token: string | null = null;
@@ -47,10 +49,15 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}): Promise<an
 
   for (const baseURL of baseURLs) {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+
       const response = await fetch(`${baseURL}${endpoint}`, {
         ...options,
         headers,
+        signal: options.signal || controller.signal,
       });
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({ detail: `HTTP ${response.status}` }));
@@ -64,14 +71,14 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}): Promise<an
       return response;
     } catch (err: any) {
       lastError = err;
-      if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
+      if (err.name === 'AbortError' || (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError') || err.message.includes('aborted')))) {
         continue;
       }
       throw err;
     }
   }
 
-  throw new Error(`Unable to connect to AutoMLOps backend server at ${baseURLs[0]}. Please ensure backend is running.`);
+  throw new Error(lastError?.message || `Unable to connect to AutoMLOps backend server at ${baseURLs[0]}. Please ensure backend is running.`);
 }
 
 /**
