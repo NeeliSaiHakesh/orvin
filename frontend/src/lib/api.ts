@@ -5,6 +5,8 @@
  * Handles authentication, error handling, CORS fallbacks, and all API endpoints.
  */
 
+const DEFAULT_CLOUD_API_URL = 'https://mlops-ckjk.onrender.com/api/v1';
+
 function normalizeBaseURL(url: string): string {
   let u = url.trim().replace(/\/+$/, '');
   if (!u.endsWith('/api/v1') && !u.endsWith('/api')) {
@@ -18,14 +20,13 @@ function getCandidateBaseURLs(): string[] {
     return [normalizeBaseURL(process.env.NEXT_PUBLIC_API_URL)];
   }
   if (typeof window !== 'undefined') {
-    const host = window.location.hostname || 'localhost';
-    const urls: string[] = ['http://127.0.0.1:8000/api/v1', 'http://localhost:8000/api/v1'];
-    if (host !== '127.0.0.1' && host !== 'localhost') {
-      urls.unshift(`http://${host}:8000/api/v1`);
+    const host = window.location.hostname || '';
+    if (host.includes('vercel.app') || host.includes('onrender.com')) {
+      return [DEFAULT_CLOUD_API_URL];
     }
-    return urls;
+    return ['http://127.0.0.1:8000/api/v1', 'http://localhost:8000/api/v1', DEFAULT_CLOUD_API_URL];
   }
-  return ['http://127.0.0.1:8000/api/v1', 'http://localhost:8000/api/v1'];
+  return [DEFAULT_CLOUD_API_URL];
 }
 
 /**
