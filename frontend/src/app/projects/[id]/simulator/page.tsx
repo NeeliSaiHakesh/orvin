@@ -255,6 +255,53 @@ export default function SimulatorPage() {
         label="Dataset For Simulation"
       />
 
+      {/* Model Benchmark Selector Card */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="p-4 rounded-xl glass border-cyan-500/30 bg-cyan-500/5 space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold text-cyan-300">Baseline Production Model:</span>
+            <span className="font-mono text-[10px] text-gray-400">Reference Baseline</span>
+          </div>
+          <select
+            value={baselineModel}
+            onChange={(e) => {
+              const val = e.target.value;
+              setBaselineModel(val);
+              triggerSimulation(scenarioValues, selectedDataset || undefined, val, hypotheticalModel);
+            }}
+            className="w-full bg-[#0f172a] text-white border border-cyan-500/40 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500/50 cursor-pointer"
+          >
+            {(availableModels.length > 0 ? availableModels : ["Best Model (LightGBM)", "RandomForest (85.7% Acc)", "XGBoost (87.2% Acc)", "LogisticRegression (79.1% Acc)"]).map((m) => (
+              <option key={m} value={m} className="bg-[#0f172a] text-white py-1">
+                {m}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="p-4 rounded-xl glass border-purple-500/30 bg-purple-500/5 space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold text-purple-300">Challenger / Hypothetical Architecture:</span>
+            <span className="font-mono text-[10px] text-gray-400">Simulated Target</span>
+          </div>
+          <select
+            value={hypotheticalModel}
+            onChange={(e) => {
+              const val = e.target.value;
+              setHypotheticalModel(val);
+              triggerSimulation(scenarioValues, selectedDataset || undefined, baselineModel, val);
+            }}
+            className="w-full bg-[#0f172a] text-white border border-purple-500/40 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/50 cursor-pointer"
+          >
+            {(availableModels.length > 0 ? availableModels : ["XGBoost (Deep Trees)", "Neural Network (MLP)", "CatBoost Classifier", "Ensemble Stacking"]).map((m) => (
+              <option key={m} value={m} className="bg-[#0f172a] text-white py-1">
+                {m}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       {error && (
         <div className="glass border-red-500/30 bg-red-500/10 p-4 rounded-xl text-red-400 text-sm flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
