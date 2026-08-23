@@ -267,4 +267,18 @@ export const api = {
       return fetchAPI(`/projects/${projectId}/decisions/generate${q}`, { method: 'POST' });
     },
   },
+
+  // ── What-If Model Simulator ──
+  simulator: {
+    getSchema: (projectId: string, datasetId?: string) => {
+      const q = datasetId ? `?dataset_id=${encodeURIComponent(datasetId)}` : '';
+      return fetchAPI(`/projects/${projectId}/simulator/schema${q}`);
+    },
+
+    run: (projectId: string, payload: Record<string, any>) =>
+      fetchAPI(`/projects/${projectId}/simulator/run`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
+  },
 };
