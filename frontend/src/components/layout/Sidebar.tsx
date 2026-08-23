@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { 
   LayoutDashboard, Database, BarChart2, Wand2, 
   Dna, Cpu, Share2, FileCode2, Settings, Bot,
-  Plus, ArrowLeft, FolderPlus, BrainCircuit, Sparkles, Sliders, ShieldCheck, Leaf
+  Plus, ArrowLeft, FolderPlus, BrainCircuit, Sparkles, Sliders, ShieldCheck, Leaf, Award
 } from 'lucide-react';
 import { useUIStore } from '@/lib/store';
 
@@ -29,6 +29,7 @@ export function Sidebar({ projectId }: { projectId?: string }) {
     { name: 'Simulator', href: `/projects/${projectId}/simulator`, icon: <Sliders className="text-purple-400" /> },
     { name: 'Self-Healing', href: `/projects/${projectId}/self-healing`, icon: <ShieldCheck className="text-emerald-400" /> },
     { name: 'Cost & Carbon', href: `/projects/${projectId}/cost-carbon`, icon: <Leaf className="text-green-400" /> },
+    { name: 'Readiness', href: `/projects/${projectId}/readiness`, icon: <Award className="text-yellow-400" /> },
     { name: 'Explain', href: `/projects/${projectId}/explain`, icon: <Share2 /> },
     { name: 'API Gen', href: `/projects/${projectId}/api-gen`, icon: <FileCode2 /> },
     { name: 'Assistant', href: `/projects/${projectId}/assistant`, icon: <Bot /> },

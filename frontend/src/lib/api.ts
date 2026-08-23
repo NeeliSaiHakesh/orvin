@@ -312,4 +312,12 @@ export const api = {
         body: JSON.stringify(payload),
       }),
   },
+
+  // ── Model Health & Production Readiness Score ──
+  readiness: {
+    getScore: (projectId: string, datasetId?: string) => {
+      const q = datasetId ? `?dataset_id=${encodeURIComponent(datasetId)}` : '';
+      return fetchAPI(`/projects/${projectId}/readiness/score${q}`);
+    },
+  },
 };
