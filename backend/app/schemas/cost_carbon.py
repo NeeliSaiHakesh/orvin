@@ -26,6 +26,11 @@ class GreenOptimizationItem(BaseModel):
 class CostCarbonResponse(BaseModel):
     project_id: str
     dataset_name: Optional[str] = None
+    dataset_row_count: Optional[int] = None
+    dataset_column_count: Optional[int] = None
+    payload_size_kb: Optional[float] = None
+    recommended_daily_requests: Optional[int] = None
+    recommended_target_latency_ms: Optional[float] = None
     daily_requests: int
     target_p95_latency_ms: float
     selected_region: str
@@ -42,8 +47,8 @@ class CostCarbonResponse(BaseModel):
 
 class CostCarbonRequest(BaseModel):
     dataset_id: Optional[str] = None
-    daily_requests: int = 100000
-    target_p95_latency_ms: float = 25.0
-    region: str = "us-east-1"
+    daily_requests: Optional[int] = None
+    target_p95_latency_ms: Optional[float] = None
+    region: str = "us-east-1 (N. Virginia - Gas/Coal)"
     hardware_tier: str = "cpu_standard"  # cpu_standard, arm_graviton, gpu_t4
     spot_enabled: bool = False

@@ -14,43 +14,64 @@ REGIONAL_CARBON_FACTORS: Dict[str, int] = {
 }
 
 def calculate_cloud_cost_and_carbon(
-    daily_requests: int = 100000,
-    target_p95_latency_ms: float = 25.0,
+    daily_requests: Optional[int] = None,
+    target_p95_latency_ms: Optional[float] = None,
     region: str = "us-east-1 (N. Virginia - Gas/Coal)",
     hardware_tier: str = "cpu_standard",
     spot_enabled: bool = False,
-    dataset_name: Optional[str] = None
+    dataset_name: Optional[str] = None,
+    row_count: Optional[int] = None,
+    column_count: Optional[int] = None
 ) -> Dict[str, Any]:
     """
-    Computes precise multi-cloud infrastructure cost ($/month) and carbon emissions (kg CO2e/year)
-    across AWS, GCP, Azure, and On-Premise architectures.
+    Computes dynamic multi-cloud infrastructure cost ($/month) and carbon emissions (kg CO2e/year)
+    tailored directly to dataset dimensional scale and workload parameters.
     """
-    # Average throughput capacity per 1 vCPU worker (req/sec) based on latency target
-    base_rps_per_worker = max(10, int(1000 / (target_p95_latency_ms or 25)))
+    cols = column_count if (column_count and column_count > 0) else 14
+    rows = row_count if (row_count and row_count > 0) else 1000
+
+    # Dynamic dataset payload calculation
+    payload_size_kb = round(max(0.6, cols * 0.16), 1)
+
+    # Inferred recommended workload based on dataset scale
+    rec_daily_requests = min(1500000, max(30000, rows * 50))
+    rec_latency_ms = 15.0 if cols < 12 else (25.0 if cols < 35 else 40.0)
+
+    active_daily_requests = daily_requests if (daily_requests and daily_requests > 0) else rec_daily_requests
+    active_latency_ms = target_p95_latency_ms if (target_p95_latency_ms and target_p95_latency_ms > 0) else rec_latency_ms
+
+    # Feature dimensionality impact on RAM & processing latency
+    complexity_factor = 1.0 + max(0.0, (cols - 10) * 0.02)
+
+    # Average throughput capacity per 1 vCPU worker (req/sec)
+    base_rps_per_worker = max(10, int((1000 / (active_latency_ms or 25)) / complexity_factor))
     seconds_per_month = 730 * 3600
-    total_monthly_requests = daily_requests * 30.4
+    total_monthly_requests = active_daily_requests * 30.4
 
     # Required worker replicas to maintain SLA
-    peak_factor = 2.2  # Peak vs average traffic ratio
-    avg_rps = daily_requests / 86400.0
+    peak_factor = 2.2
+    avg_rps = active_daily_requests / 86400.0
     peak_rps = avg_rps * peak_factor
     req_replicas = max(1, math.ceil(peak_rps / base_rps_per_worker))
+
+    # Base RAM scaling according to feature width
+    base_ram = 1.0 if cols < 15 else (2.0 if cols < 40 else 4.0)
 
     # Hardware specs per worker
     if hardware_tier == "arm_graviton":
         vcpus_per_worker = 1.0
-        ram_gb_per_worker = 1.0
-        power_watts_per_worker = 14.0  # High efficiency ARM
-        cost_multiplier = 0.80         # Graviton 20% discount
+        ram_gb_per_worker = max(1.0, base_ram * 0.75)
+        power_watts_per_worker = 14.0 * complexity_factor
+        cost_multiplier = 0.80
     elif hardware_tier == "gpu_t4":
         vcpus_per_worker = 4.0
         ram_gb_per_worker = 16.0
-        power_watts_per_worker = 120.0 # GPU acceleration
+        power_watts_per_worker = 120.0
         cost_multiplier = 2.80
     else:  # cpu_standard
         vcpus_per_worker = 1.0
-        ram_gb_per_worker = 2.0
-        power_watts_per_worker = 28.0
+        ram_gb_per_worker = base_ram
+        power_watts_per_worker = 28.0 * complexity_factor
         cost_multiplier = 1.0
 
     # Spot / Preemptible discount
@@ -58,13 +79,12 @@ def calculate_cloud_cost_and_carbon(
 
     # Carbon intensity factor (g CO2e / kWh)
     carbon_intensity_g_kwh = REGIONAL_CARBON_FACTORS.get(region, 379)
-    pue = 1.15  # Cloud Datacenter Power Usage Effectiveness
+    pue = 1.15
 
-    # Energy in kWh/year: (replicas * Watts / 1000) * 8760 hours * PUE
+    # Energy in kWh/year
     annual_kwh = (req_replicas * power_watts_per_worker / 1000.0) * 8760 * pue
     annual_co2_kg = (annual_kwh * carbon_intensity_g_kwh) / 1000.0
 
-    # Helper to assign green rating
     def get_green_rating(co2_kg: float) -> str:
         if co2_kg < 50:
             return "A+"
@@ -78,165 +98,166 @@ def calculate_cloud_cost_and_carbon(
             return "D"
 
     # --- 1. AWS Estimate (ECS Fargate + ALB) ---
-    # Fargate: $0.04048 per vCPU-hr, $0.004445 per GB-hr + $18 ALB
-    aws_compute_monthly = req_replicas * 730 * (
-        (vcpus_per_worker * 0.04048 * cost_multiplier) + (ram_gb_per_worker * 0.004445)
-    ) * spot_discount
-    aws_total_monthly = round(aws_compute_monthly + 16.0, 2)
-    aws_cost_per_m = round((aws_total_monthly / (total_monthly_requests / 1_000_000)), 3)
+    aws_vcpu_rate = 0.04048 * cost_multiplier
+    aws_ram_rate = 0.004445
+    aws_fargate_hr = (vcpus_per_worker * aws_vcpu_rate) + (ram_gb_per_worker * aws_ram_rate)
+    aws_monthly_compute = req_replicas * aws_fargate_hr * 730 * spot_discount
+    aws_alb_cost = 16.0 + (total_monthly_requests / 1_000_000) * 0.8
+    aws_monthly_total = round(aws_monthly_compute + aws_alb_cost, 2)
+    aws_cost_per_m = round((aws_monthly_total / (total_monthly_requests / 1_000_000)), 3)
+    aws_carbon_kg = round(annual_co2_kg * 1.0, 1)
 
-    # --- 2. GCP Estimate (Cloud Run + Cloud Armor) ---
-    # Cloud Run: $0.00002400 / vCPU-sec, $0.00000250 / GB-sec
-    gcp_compute_monthly = req_replicas * 730 * 3600 * (
-        (vcpus_per_worker * 0.00002400 * cost_multiplier) + (ram_gb_per_worker * 0.00000250)
-    ) * spot_discount
-    gcp_total_monthly = round(gcp_compute_monthly + 12.0, 2)
-    gcp_cost_per_m = round((gcp_total_monthly / (total_monthly_requests / 1_000_000)), 3)
+    # --- 2. GCP Estimate (Cloud Run + Serverless VPC) ---
+    gcp_vcpu_rate = 0.0384 * cost_multiplier
+    gcp_ram_rate = 0.0042
+    gcp_active_hr = (vcpus_per_worker * gcp_vcpu_rate) + (ram_gb_per_worker * gcp_ram_rate)
+    gcp_monthly_compute = req_replicas * gcp_active_hr * 730 * 0.90 * spot_discount
+    gcp_ingress_cost = 8.0 + (total_monthly_requests / 1_000_000) * 0.4
+    gcp_monthly_total = round(gcp_monthly_compute + gcp_ingress_cost, 2)
+    gcp_cost_per_m = round((gcp_monthly_total / (total_monthly_requests / 1_000_000)), 3)
+    gcp_carbon_kg = round(annual_co2_kg * 0.88, 1)
 
-    # --- 3. Azure Estimate (Container Apps) ---
-    azure_compute_monthly = req_replicas * 730 * 3600 * (
-        (vcpus_per_worker * 0.000024 * cost_multiplier) + (ram_gb_per_worker * 0.000003)
-    ) * spot_discount
-    azure_total_monthly = round(azure_compute_monthly + 14.0, 2)
-    azure_cost_per_m = round((azure_total_monthly / (total_monthly_requests / 1_000_000)), 3)
+    # --- 3. Azure Estimate (Container Apps + Standard Load Balancer) ---
+    azure_vcpu_rate = 0.0395 * cost_multiplier
+    azure_ram_rate = 0.0043
+    azure_active_hr = (vcpus_per_worker * azure_vcpu_rate) + (ram_gb_per_worker * azure_ram_rate)
+    azure_monthly_compute = req_replicas * azure_active_hr * 730 * 0.95 * spot_discount
+    azure_gw_cost = 14.0 + (total_monthly_requests / 1_000_000) * 0.6
+    azure_monthly_total = round(azure_monthly_compute + azure_gw_cost, 2)
+    azure_cost_per_m = round((azure_monthly_total / (total_monthly_requests / 1_000_000)), 3)
+    azure_carbon_kg = round(annual_co2_kg * 0.92, 1)
 
     # --- 4. On-Premise / Bare Metal Estimate ---
-    # Hardware amortization ($18/node/mo) + Electricity ($0.14/kWh)
-    onprem_monthly_kwh = (req_replicas * power_watts_per_worker * 1.3 / 1000.0) * 730
-    onprem_total_monthly = round((req_replicas * 18.0) + (onprem_monthly_kwh * 0.14), 2)
-    onprem_cost_per_m = round((onprem_total_monthly / (total_monthly_requests / 1_000_000)), 3)
-    onprem_annual_co2 = annual_co2_kg * 1.25  # Lower PUE efficiency in private racks
+    onprem_monthly = round(max(35.0, req_replicas * 18.0 * cost_multiplier), 2)
+    onprem_cost_per_m = round((onprem_monthly / (total_monthly_requests / 1_000_000)), 3)
+    onprem_carbon_kg = round(annual_co2_kg * 1.35, 1)
 
     providers = [
         {
-            "provider": "Google Cloud (GCP)",
-            "service_name": "Cloud Run Serverless Container",
-            "instance_type": f"{vcpus_per_worker} vCPU / {ram_gb_per_worker}GB RAM",
-            "vcpus": vcpus_per_worker * req_replicas,
-            "ram_gb": ram_gb_per_worker * req_replicas,
-            "monthly_cost_usd": gcp_total_monthly,
+            "provider": "Google Cloud",
+            "service_name": "Cloud Run (Auto-Scaled)",
+            "instance_type": f"{vcpus_per_worker} vCPU, {ram_gb_per_worker}GB RAM",
+            "vcpus": vcpus_per_worker,
+            "ram_gb": ram_gb_per_worker,
+            "monthly_cost_usd": gcp_monthly_total,
             "cost_per_million_requests": gcp_cost_per_m,
-            "annual_carbon_kg_co2": round(annual_co2_kg, 1),
-            "carbon_intensity_rating": get_green_rating(annual_co2_kg),
+            "annual_carbon_kg_co2": gcp_carbon_kg,
+            "carbon_intensity_rating": get_green_rating(gcp_carbon_kg),
             "is_cost_winner": False,
-            "is_green_winner": False
+            "is_green_winner": True
         },
         {
-            "provider": "Amazon Web Services (AWS)",
+            "provider": "AWS",
             "service_name": "ECS Fargate + ALB",
-            "instance_type": f"Fargate ({vcpus_per_worker} vCPU, {ram_gb_per_worker}GB)",
-            "vcpus": vcpus_per_worker * req_replicas,
-            "ram_gb": ram_gb_per_worker * req_replicas,
-            "monthly_cost_usd": aws_total_monthly,
+            "instance_type": f"{vcpus_per_worker} vCPU, {ram_gb_per_worker}GB RAM",
+            "vcpus": vcpus_per_worker,
+            "ram_gb": ram_gb_per_worker,
+            "monthly_cost_usd": aws_monthly_total,
             "cost_per_million_requests": aws_cost_per_m,
-            "annual_carbon_kg_co2": round(annual_co2_kg * 1.05, 1),
-            "carbon_intensity_rating": get_green_rating(annual_co2_kg * 1.05),
+            "annual_carbon_kg_co2": aws_carbon_kg,
+            "carbon_intensity_rating": get_green_rating(aws_carbon_kg),
             "is_cost_winner": False,
             "is_green_winner": False
         },
         {
-            "provider": "Microsoft Azure",
-            "service_name": "Azure Container Apps",
-            "instance_type": f"Consumption Tier ({vcpus_per_worker} Core)",
-            "vcpus": vcpus_per_worker * req_replicas,
-            "ram_gb": ram_gb_per_worker * req_replicas,
-            "monthly_cost_usd": azure_total_monthly,
+            "provider": "Azure",
+            "service_name": "Container Apps Environment",
+            "instance_type": f"{vcpus_per_worker} vCPU, {ram_gb_per_worker}GB RAM",
+            "vcpus": vcpus_per_worker,
+            "ram_gb": ram_gb_per_worker,
+            "monthly_cost_usd": azure_monthly_total,
             "cost_per_million_requests": azure_cost_per_m,
-            "annual_carbon_kg_co2": round(annual_co2_kg * 1.02, 1),
-            "carbon_intensity_rating": get_green_rating(annual_co2_kg * 1.02),
+            "annual_carbon_kg_co2": azure_carbon_kg,
+            "carbon_intensity_rating": get_green_rating(azure_carbon_kg),
             "is_cost_winner": False,
             "is_green_winner": False
         },
         {
-            "provider": "On-Premise / Bare Metal",
-            "service_name": "Self-Hosted K8s Cluster",
-            "instance_type": "Bare Metal 1U Node",
-            "vcpus": vcpus_per_worker * req_replicas,
-            "ram_gb": ram_gb_per_worker * req_replicas,
-            "monthly_cost_usd": onprem_total_monthly,
+            "provider": "On-Premise",
+            "service_name": "Private Kubernetes Cluster",
+            "instance_type": f"Bare Metal Node Slice ({vcpus_per_worker} Core, {ram_gb_per_worker}GB)",
+            "vcpus": vcpus_per_worker,
+            "ram_gb": ram_gb_per_worker,
+            "monthly_cost_usd": onprem_monthly,
             "cost_per_million_requests": onprem_cost_per_m,
-            "annual_carbon_kg_co2": round(onprem_annual_co2, 1),
-            "carbon_intensity_rating": get_green_rating(onprem_annual_co2),
-            "is_cost_winner": False,
+            "annual_carbon_kg_co2": onprem_carbon_kg,
+            "carbon_intensity_rating": get_green_rating(onprem_carbon_kg),
+            "is_cost_winner": True,
             "is_green_winner": False
         }
     ]
 
-    # Determine Cost Winner and Green Winner
     min_cost = min(p["monthly_cost_usd"] for p in providers)
     min_co2 = min(p["annual_carbon_kg_co2"] for p in providers)
 
     for p in providers:
-        if p["monthly_cost_usd"] == min_cost:
-            p["is_cost_winner"] = True
-        if p["annual_carbon_kg_co2"] == min_co2:
-            p["is_green_winner"] = True
+        p["is_cost_winner"] = (p["monthly_cost_usd"] == min_cost)
+        p["is_green_winner"] = (p["annual_carbon_kg_co2"] == min_co2)
 
-    cost_winner = next(p["provider"] for p in providers if p["is_cost_winner"])
-    green_winner = next(p["provider"] for p in providers if p["is_green_winner"])
+    best_cost_p = next(p["provider"] for p in providers if p["is_cost_winner"])
+    best_green_p = next(p["provider"] for p in providers if p["is_green_winner"])
 
-    # Green MLOps Optimization Recommendations
+    spot_savings = round(aws_monthly_total * 0.65, 2)
+    green_region_co2_diff = round(max(0, annual_co2_kg - ((annual_kwh * 12) / 1000.0)), 1)
+
     optimizations = [
         {
             "id": "opt-spot",
-            "title": "Enable Spot / Preemptible Worker Pool",
-            "action": "Route non-critical background batch inference and 50% of web replicas to Spot instances.",
-            "monthly_savings_usd": round(aws_total_monthly * 0.65, 2),
-            "carbon_reduction_pct": 0.0,
+            "title": "Enable Spot / Preemptible Container Instances",
+            "action": "Route 80% of stateless inference workload to Spot capacity pools with automatic graceful draining.",
+            "monthly_savings_usd": spot_savings if not spot_enabled else 0.0,
+            "carbon_reduction_pct": 0,
             "difficulty": "Easy",
-            "impact_description": "Reduces raw compute spend by up to 65% with zero impact on P95 latency."
-        },
-        {
-            "id": "opt-onnx",
-            "title": "ONNX Runtime & INT8 Quantization",
-            "action": "Quantize trained tree/neural models from FP32 to INT8 and deploy via ONNX C++ runtime.",
-            "monthly_savings_usd": round(aws_total_monthly * 0.40, 2),
-            "carbon_reduction_pct": 58.0,
-            "difficulty": "Moderate",
-            "impact_description": "Increases throughput by 2.8x, halving required active container replicas and energy draw."
+            "impact_description": "Reduces raw compute spend by up to 65% with zero SLA degradation on multi-replica deployments."
         },
         {
             "id": "opt-green-region",
-            "title": "Low-Carbon Regional Routing (eu-north-1 / us-west-2)",
-            "action": "Deploy primary inference endpoint to hydro/renewable powered datacenter regions.",
+            "title": "Migrate Deployment to Hydro-Powered Carbon-Neutral Region",
+            "action": f"Deploy inference cluster to eu-north-1 (Sweden) or us-west-2 (Oregon) to utilize 95%+ renewable hydro power.",
             "monthly_savings_usd": 0.0,
-            "carbon_reduction_pct": 82.0,
-            "difficulty": "Easy",
-            "impact_description": "Slashing annual carbon footprint from 379g/kWh down to 12g/kWh (up to 88% net reduction)."
+            "carbon_reduction_pct": round(min(96.0, (1.0 - (12.0 / max(13, carbon_intensity_g_kwh))) * 100), 1),
+            "difficulty": "Moderate",
+            "impact_description": f"Reduces annual carbon footprint by {green_region_co2_diff} kg CO2e without hardware changes."
         },
         {
-            "id": "opt-scale-zero",
-            "title": "Scale-to-Zero Off-Peak Idle Policy",
-            "action": "Configure serverless minimum replicas to 0 between 12:00 AM – 6:00 AM UTC.",
-            "monthly_savings_usd": round(aws_total_monthly * 0.22, 2),
-            "carbon_reduction_pct": 24.0,
-            "difficulty": "Easy",
-            "impact_description": "Eliminates idle compute energy waste during low-traffic overnight windows."
+            "id": "opt-quantization",
+            "title": "Apply ONNX C++ Runtime & INT8 Quantization",
+            "action": "Compress model graph weights to INT8 to reduce per-request memory throughput by 3.2x.",
+            "monthly_savings_usd": round(aws_monthly_total * 0.28, 2),
+            "carbon_reduction_pct": 28.0,
+            "difficulty": "Advanced",
+            "impact_description": "Allows worker consolidation, dropping required replicas from " + str(req_replicas) + " to " + str(max(1, math.ceil(req_replicas * 0.65))) + "."
         }
     ]
 
-    total_potential_savings = sum(o["monthly_savings_usd"] for o in optimizations)
-    total_co2_reduct = round(annual_co2_kg * 0.68, 1)
+    total_pot_savings = round(sum(o["monthly_savings_usd"] for o in optimizations), 2)
+    total_pot_carbon_red = round(green_region_co2_diff, 1)
 
+    ds_display = f"'{dataset_name}' ({cols} features, ~{payload_size_kb}KB/payload)" if dataset_name else f"Active Workload ({cols} features)"
     summary = (
-        f"For {daily_requests:,} requests/day (~{round(total_monthly_requests/1_000_000, 1)}M/mo) with a {target_p95_latency_ms}ms SLA, "
-        f"{cost_winner} provides the lowest cost (${min_cost}/mo) and {green_winner} provides the lowest carbon intensity ({min_co2} kg CO₂e/yr). "
-        f"Applying Green MLOps optimizations unlocks up to ${total_potential_savings}/mo in savings and {total_co2_reduct} kg CO₂e reduction."
+        f"Workload sized for {ds_display} processing {active_daily_requests:,} daily inferences under a {active_latency_ms}ms P95 SLA target. "
+        f"Requires {req_replicas} parallel container worker(s) across the cluster. "
+        f"Best economics: {best_cost_p} (${min_cost}/mo). Lowest emissions: {best_green_p} ({min_co2} kg CO2e/yr)."
     )
 
     return {
         "project_id": "",
         "dataset_name": dataset_name,
-        "daily_requests": daily_requests,
-        "target_p95_latency_ms": target_p95_latency_ms,
+        "dataset_row_count": rows,
+        "dataset_column_count": cols,
+        "payload_size_kb": payload_size_kb,
+        "recommended_daily_requests": rec_daily_requests,
+        "recommended_target_latency_ms": rec_latency_ms,
+        "daily_requests": active_daily_requests,
+        "target_p95_latency_ms": active_latency_ms,
         "selected_region": region,
         "hardware_tier": hardware_tier,
         "spot_enabled": spot_enabled,
         "summary": summary,
-        "best_cost_provider": cost_winner,
-        "best_green_provider": green_winner,
-        "total_potential_monthly_savings": total_potential_savings,
-        "total_potential_carbon_reduction_kg": total_co2_reduct,
+        "best_cost_provider": best_cost_p,
+        "best_green_provider": best_green_p,
+        "total_potential_monthly_savings": total_pot_savings,
+        "total_potential_carbon_reduction_kg": total_pot_carbon_red,
         "providers": providers,
         "optimizations": optimizations,
         "regional_carbon_factors": REGIONAL_CARBON_FACTORS

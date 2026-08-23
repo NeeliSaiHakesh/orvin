@@ -39,12 +39,14 @@ async def get_cost_carbon_estimate(
             dataset_name = ds.filename
 
     res = calculate_cloud_cost_and_carbon(
-        daily_requests=100000,
-        target_p95_latency_ms=25.0,
+        daily_requests=None,
+        target_p95_latency_ms=None,
         region="us-east-1 (N. Virginia - Gas/Coal)",
         hardware_tier="cpu_standard",
         spot_enabled=False,
-        dataset_name=dataset_name
+        dataset_name=dataset_name,
+        row_count=ds.row_count if ds else None,
+        column_count=ds.column_count if ds else None
     )
     res["project_id"] = project_id
     return res
@@ -62,6 +64,7 @@ async def calculate_custom_cost_carbon(
         raise HTTPException(status_code=404, detail="Project not found")
 
     dataset_name = None
+    ds = None
     if request.dataset_id:
         ds_res = await db.execute(select(Dataset).filter(Dataset.id == request.dataset_id))
         ds = ds_res.scalars().first()
@@ -81,7 +84,9 @@ async def calculate_custom_cost_carbon(
         region=request.region,
         hardware_tier=request.hardware_tier,
         spot_enabled=request.spot_enabled,
-        dataset_name=dataset_name
+        dataset_name=dataset_name,
+        row_count=ds.row_count if ds else None,
+        column_count=ds.column_count if ds else None
     )
     res["project_id"] = project_id
     return res
