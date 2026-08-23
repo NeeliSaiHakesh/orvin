@@ -48,16 +48,16 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}): Promise<an
   let lastError: any = null;
 
   for (const baseURL of baseURLs) {
+    let timeoutId: any = null;
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      timeoutId = setTimeout(() => controller.abort(), 90000); // 90s cloud SLA allowance
 
       const response = await fetch(`${baseURL}${endpoint}`, {
         ...options,
         headers,
         signal: options.signal || controller.signal,
       });
-      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({ detail: `HTTP ${response.status}` }));
@@ -75,6 +75,10 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}): Promise<an
         continue;
       }
       throw err;
+    } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     }
   }
 
