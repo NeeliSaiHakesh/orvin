@@ -1,8 +1,13 @@
 from fastapi import FastAPI  # type: ignore
 from fastapi.middleware.cors import CORSMiddleware  # type: ignore
-from app.config import settings  # type: ignore
-from app.database import init_db  # type: ignore
-from app.routers import auth, projects, datasets, analysis, cleaning, features, training, explain, api_gen, assistant, decision, simulator, self_healing, cost_carbon, readiness  # type: ignore
+try:
+    from app.config import settings
+    from app.database import init_db
+    from app.routers import auth, projects, datasets, analysis, cleaning, features, training, explain, api_gen, assistant, decision, simulator, self_healing, cost_carbon, readiness
+except (ImportError, ModuleNotFoundError):
+    from .config import settings  # type: ignore
+    from .database import init_db  # type: ignore
+    from .routers import auth, projects, datasets, analysis, cleaning, features, training, explain, api_gen, assistant, decision, simulator, self_healing, cost_carbon, readiness  # type: ignore
 
 app = FastAPI(
     title="AutoMLOps Platform API",
