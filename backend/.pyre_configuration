@@ -1,0 +1,10 @@
+{
+  "site_package_search_strategy": "all",
+  "search_path": [
+    ".",
+    "venv/Lib/site-packages"
+  ],
+  "source_directories": [
+    "."
+  ]
+}
