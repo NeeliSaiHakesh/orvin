@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field  # type: ignore
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 

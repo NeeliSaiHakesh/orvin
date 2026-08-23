@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
+from fastapi import APIRouter, Depends, HTTPException, Query  # type: ignore
+from sqlalchemy.ext.asyncio import AsyncSession  # type: ignore
+from sqlalchemy.future import select  # type: ignore
 from typing import Optional
-import pandas as pd
+import pandas as pd  # type: ignore
 import os
 from app.database import get_db
 from app.core.dependencies import get_current_user
