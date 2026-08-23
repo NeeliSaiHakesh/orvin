@@ -58,6 +58,7 @@
 | **Target Distribution Analysis** | Class balance for classification tasks; skewness & distribution for regression. | ✅ Active |
 | **Correlation Matrix & Heatmaps** | Pearson/Spearman correlation for numerical features; multicollinearity detection. | ✅ Active |
 | **Outlier Detection** | IQR and Z-score based anomaly identification per feature. | ✅ Active |
+| **Multi-Dataset Isolation & Versioning** | Independent dataset IDs, separate profiling, cleaning history, and pipeline isolation per file. | ✅ Active |
 
 ---
 
