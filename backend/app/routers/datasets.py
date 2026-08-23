@@ -15,12 +15,16 @@ router = APIRouter(tags=["datasets"])
 
 @router.post("/projects/{project_id}/datasets", response_model=DatasetResponse)
 async def upload_dataset(project_id: str, file: UploadFile = File(...), db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
-    file_path = os.path.join(settings.UPLOAD_DIR, file.filename)
+    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+    clean_filename = os.path.basename(file.filename or "dataset.csv")
+    file_path = os.path.join(settings.UPLOAD_DIR, clean_filename)
+    
     with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+        while chunk := await file.read(1024 * 1024):  # 1MB chunks
+            buffer.write(chunk)
         
     file_size = os.path.getsize(file_path)
-    file_type = file.filename.split('.')[-1].lower()
+    file_type = clean_filename.split('.')[-1].lower()
     
     # Fast row/column detection
     try:
