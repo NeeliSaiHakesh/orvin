@@ -4,22 +4,22 @@ Trains multiple ML models with lightning-fast hyperparameter exploration,
 cross-validation, and comprehensive model comparison.
 Supports both classification and regression tasks.
 """
-import pandas as pd
-import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-from sklearn.linear_model import LogisticRegression, LinearRegression, Ridge
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, GradientBoostingClassifier, GradientBoostingRegressor
-from sklearn.svm import SVC, SVR
-from sklearn.neural_network import MLPClassifier, MLPRegressor
-from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
-from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
-from sklearn.metrics import (
+import pandas as pd  # type: ignore
+import numpy as np  # type: ignore
+from sklearn.model_selection import train_test_split  # type: ignore
+from sklearn.preprocessing import LabelEncoder  # type: ignore
+from sklearn.linear_model import LogisticRegression, LinearRegression, Ridge  # type: ignore
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, GradientBoostingClassifier, GradientBoostingRegressor  # type: ignore
+from sklearn.svm import SVC, SVR  # type: ignore
+from sklearn.neural_network import MLPClassifier, MLPRegressor  # type: ignore
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor  # type: ignore
+from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor  # type: ignore
+from sklearn.metrics import (  # type: ignore
     accuracy_score, f1_score, precision_score, recall_score,
     roc_auc_score, mean_squared_error, mean_absolute_error, r2_score,
     confusion_matrix as sk_confusion_matrix,
 )
-import joblib
+import joblib  # type: ignore
 import time
 import os
 import warnings
@@ -29,19 +29,19 @@ warnings.filterwarnings('ignore')
 
 # Optional libraries
 try:
-    from xgboost import XGBClassifier, XGBRegressor
+    from xgboost import XGBClassifier, XGBRegressor  # type: ignore
     HAS_XGBOOST = True
 except Exception:
     HAS_XGBOOST = False
 
 try:
-    from lightgbm import LGBMClassifier, LGBMRegressor
+    from lightgbm import LGBMClassifier, LGBMRegressor  # type: ignore
     HAS_LIGHTGBM = True
 except Exception:
     HAS_LIGHTGBM = False
 
 try:
-    from catboost import CatBoostClassifier, CatBoostRegressor
+    from catboost import CatBoostClassifier, CatBoostRegressor  # type: ignore
     HAS_CATBOOST = True
 except Exception:
     HAS_CATBOOST = False
