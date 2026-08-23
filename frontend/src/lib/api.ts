@@ -5,13 +5,20 @@
  * Handles authentication, error handling, CORS fallbacks, and all API endpoints.
  */
 
+function normalizeBaseURL(url: string): string {
+  let u = url.trim().replace(/\/+$/, '');
+  if (!u.endsWith('/api/v1') && !u.endsWith('/api')) {
+    u = `${u}/api/v1`;
+  }
+  return u;
+}
+
 function getCandidateBaseURLs(): string[] {
   if (process.env.NEXT_PUBLIC_API_URL) {
-    return [process.env.NEXT_PUBLIC_API_URL];
+    return [normalizeBaseURL(process.env.NEXT_PUBLIC_API_URL)];
   }
   if (typeof window !== 'undefined') {
     const host = window.location.hostname || 'localhost';
-    // Priority: IPv4 127.0.0.1 first (prevents Windows IPv6 ::1 localhost hang), then localhost
     const urls: string[] = ['http://127.0.0.1:8000/api/v1', 'http://localhost:8000/api/v1'];
     if (host !== '127.0.0.1' && host !== 'localhost') {
       urls.unshift(`http://${host}:8000/api/v1`);
@@ -22,7 +29,7 @@ function getCandidateBaseURLs(): string[] {
 }
 
 /**
- * Core fetch wrapper with auth token, CORS error handling, resilience, and timeout.
+ * Core fetch wrapper with auth token, CORS error handling, resilience, and retry.
  */
 async function fetchAPI(endpoint: string, options: RequestInit = {}): Promise<any> {
   let token: string | null = null;
@@ -48,15 +55,10 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}): Promise<an
   let lastError: any = null;
 
   for (const baseURL of baseURLs) {
-    let timeoutId: any = null;
     try {
-      const controller = new AbortController();
-      timeoutId = setTimeout(() => controller.abort(), 90000); // 90s cloud SLA allowance
-
       const response = await fetch(`${baseURL}${endpoint}`, {
         ...options,
         headers,
-        signal: options.signal || controller.signal,
       });
 
       if (!response.ok) {
@@ -71,14 +73,10 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}): Promise<an
       return response;
     } catch (err: any) {
       lastError = err;
-      if (err.name === 'AbortError' || (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError') || err.message.includes('aborted')))) {
+      if (err.name === 'AbortError' || (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')))) {
         continue;
       }
       throw err;
-    } finally {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
     }
   }
 

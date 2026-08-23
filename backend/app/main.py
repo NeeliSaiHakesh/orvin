@@ -33,22 +33,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include all routers
-app.include_router(auth.router, prefix="/api/v1")
-app.include_router(projects.router, prefix="/api/v1")
-app.include_router(datasets.router, prefix="/api/v1")
-app.include_router(analysis.router, prefix="/api/v1")
-app.include_router(cleaning.router, prefix="/api/v1")
-app.include_router(features.router, prefix="/api/v1")
-app.include_router(training.router, prefix="/api/v1")
-app.include_router(explain.router, prefix="/api/v1")
-app.include_router(api_gen.router, prefix="/api/v1")
-app.include_router(assistant.router, prefix="/api/v1")
-app.include_router(decision.router, prefix="/api/v1")
-app.include_router(simulator.router, prefix="/api/v1")
-app.include_router(self_healing.router, prefix="/api/v1")
-app.include_router(cost_carbon.router, prefix="/api/v1")
-app.include_router(readiness.router, prefix="/api/v1")
+# Dual-mount all routers at both /api/v1 and /api for zero-configuration URL compatibility
+routers = [
+    auth.router, projects.router, datasets.router, analysis.router,
+    cleaning.router, features.router, training.router, explain.router,
+    api_gen.router, assistant.router, decision.router, simulator.router,
+    self_healing.router, cost_carbon.router, readiness.router
+]
+
+for pfx in ["/api/v1", "/api"]:
+    for r in routers:
+        app.include_router(r, prefix=pfx)
 
 @app.on_event("startup")
 async def startup_event():
