@@ -17,8 +17,9 @@
 9. [Interactive AI MLOps Assistant](#9-interactive-ai-mlops-assistant)
 10. [Containerization & CI/CD Automation](#10-containerization--cicd-automation)
 11. [Monitoring, Observability & Drift Detection](#11-monitoring-observability--drift-detection)
-12. [Feature Implementation Status Matrix](#12-feature-implementation-status-matrix)
-13. [How to Add New Features](#13-how-to-add-new-features)
+12. [AI-Driven Optimization & Reliability](#12-ai-driven-optimization--reliability)
+13. [Feature Implementation Status Matrix](#13-feature-implementation-status-matrix)
+14. [How to Add New Features](#14-how-to-add-new-features)
 
 ---
 
@@ -166,7 +167,20 @@
 
 ---
 
-## 12. Feature Implementation Status Matrix
+## 12. AI-Driven Optimization & Reliability
+*Intelligent decision-making, predictive simulation, self-healing runtime, and operational sustainability.*
+
+| Feature | Description | Status |
+|---|---|---|
+| **AI MLOps Decision Engine** | Analyzes project and dataset characteristics; recommends preprocessing, ML algorithms, deployment, and monitoring strategies; provides reasoning behind each recommendation. | 🔄 In Progress |
+| **What-If Model Simulator** | Allows users to test alternative models, features, and hyperparameters; compares baseline vs. hypothetical configurations; shows expected performance and cost impact. | 🔄 In Progress |
+| **Self-Healing Pipeline** | Detects container failures, resource spikes, and drift violations; automatically performs recovery actions (restart, scaling, retraining); includes retry limits and safety controls. | 🔄 In Progress |
+| **Cost & Carbon Optimizer** | Estimates cloud infrastructure cost and carbon footprint; compares AWS, Azure, GCP, and on-premise configurations; recommends optimizations to reduce cost and energy consumption. | 🔄 In Progress |
+| **Model Health & Production Readiness Score** | Generates a 0–100 health score for deployed models; evaluates performance, reliability, monitoring, security, and deployment factors; provides specific recommendations for improving readiness. | 🔄 In Progress |
+
+---
+
+## 13. Feature Implementation Status Matrix
 
 | Module | Core Features | Current Status | Coverage |
 |---|---|---|---|
@@ -181,12 +195,13 @@
 | **AI Assistant** | RAG/Context-aware MLOps Copilot | ✅ Production Ready | 100% |
 | **Containers & DevOps** | Docker Compose, Dockerfiles, K8s generation | 🔄 Actively Expanding | 75% |
 | **Monitoring & Drift** | Prometheus, Evidently, Retraining hooks | 🔄 In Roadmap | 25% |
+| **AI Optimization & Reliability** | Decision Engine, Simulator, Self-Healing, Cost Optimizer, Health Score | 🔄 In Progress | 15% |
 
 ---
 
-## 13. How to Add New Features
+## 14. How to Add New Features
 When adding or updating features in this codebase:
 1. Locate the appropriate section above (or add a new section if introducing a new subsystem).
 2. Add the feature with its **Name**, **Description**, and **Status** (`✅ Active`, `🔄 In Progress`, or `🔄 Roadmap`).
-3. If applicable, update the [Feature Implementation Status Matrix](#12-feature-implementation-status-matrix).
+3. If applicable, update the [Feature Implementation Status Matrix](#13-feature-implementation-status-matrix).
 4. Reference the corresponding router, engine, or UI component for traceability.
