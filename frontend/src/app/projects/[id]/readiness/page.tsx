@@ -101,6 +101,7 @@ export default function ReadinessPage() {
   const handleDatasetSelect = async (datasetId: string) => {
     try {
       setSelectedDataset(datasetId);
+      setCompletedRemediations({});
       setLoading(true);
       setError(null);
       const res = await api.readiness.getScore(projectId, datasetId);
