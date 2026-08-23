@@ -15,6 +15,7 @@ from app.engines.decision_engine import generate_decision_report
 router = APIRouter(tags=["decisions"])
 
 @router.get("/projects/{project_id}/decisions", response_model=DecisionReportResponse)
+@router.get("/projects/{project_id}/decision", response_model=DecisionReportResponse)
 async def get_project_decisions(
     project_id: str,
     dataset_id: Optional[str] = Query(None),

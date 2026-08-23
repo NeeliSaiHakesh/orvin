@@ -17,17 +17,17 @@ function normalizeBaseURL(url: string): string {
 
 function getCandidateBaseURLs(): string[] {
   if (process.env.NEXT_PUBLIC_API_URL) {
-    return [normalizeBaseURL(process.env.NEXT_PUBLIC_API_URL), '/api/v1', DEFAULT_CLOUD_API_URL];
+    return [normalizeBaseURL(process.env.NEXT_PUBLIC_API_URL), DEFAULT_CLOUD_API_URL, '/api/v1'];
   }
   if (typeof window !== 'undefined') {
     const host = window.location.hostname || '';
     if (host.includes('vercel.app')) {
-      return ['/api/v1', DEFAULT_CLOUD_API_URL];
+      return [DEFAULT_CLOUD_API_URL, '/api/v1'];
     }
     if (host === 'localhost' || host === '127.0.0.1') {
-      return ['http://127.0.0.1:8000/api/v1', 'http://localhost:8000/api/v1', '/api/v1', DEFAULT_CLOUD_API_URL];
+      return ['http://127.0.0.1:8000/api/v1', 'http://localhost:8000/api/v1', DEFAULT_CLOUD_API_URL, '/api/v1'];
     }
-    return ['/api/v1', DEFAULT_CLOUD_API_URL];
+    return [DEFAULT_CLOUD_API_URL, '/api/v1'];
   }
   return [DEFAULT_CLOUD_API_URL];
 }
@@ -77,10 +77,7 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}): Promise<an
       return response;
     } catch (err: any) {
       lastError = err;
-      if (err.name === 'AbortError' || (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')))) {
-        continue;
-      }
-      throw err;
+      continue;
     }
   }
 

@@ -15,6 +15,8 @@ from app.engines.self_healing_engine import (
 router = APIRouter(tags=["self-healing"])
 
 @router.get("/projects/{project_id}/self-healing/status", response_model=SelfHealingStatusResponse)
+@router.get("/projects/{project_id}/self-healing/health", response_model=SelfHealingStatusResponse)
+@router.get("/projects/{project_id}/self-healing/incidents", response_model=SelfHealingStatusResponse)
 async def get_project_self_healing_status(
     project_id: str,
     db: AsyncSession = Depends(get_db),

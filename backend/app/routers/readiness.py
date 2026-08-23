@@ -15,6 +15,7 @@ from app.engines.readiness_engine import evaluate_production_readiness
 router = APIRouter(tags=["readiness"])
 
 @router.get("/projects/{project_id}/readiness/score", response_model=ProductionReadinessResponse)
+@router.get("/projects/{project_id}/readiness", response_model=ProductionReadinessResponse)
 async def get_production_readiness_score(
     project_id: str,
     dataset_id: Optional[str] = Query(None),

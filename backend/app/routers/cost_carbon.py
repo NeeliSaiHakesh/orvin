@@ -13,6 +13,7 @@ from app.engines.cost_carbon_engine import calculate_cloud_cost_and_carbon
 router = APIRouter(tags=["cost-carbon"])
 
 @router.get("/projects/{project_id}/cost-carbon/estimate", response_model=CostCarbonResponse)
+@router.get("/projects/{project_id}/cost-carbon", response_model=CostCarbonResponse)
 async def get_cost_carbon_estimate(
     project_id: str,
     dataset_id: Optional[str] = None,

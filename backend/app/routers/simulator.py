@@ -52,6 +52,7 @@ async def get_simulator_schema_endpoint(
     return schema_data
 
 @router.post("/projects/{project_id}/simulator/run", response_model=SimulationResponse)
+@router.post("/projects/{project_id}/simulator/predict", response_model=SimulationResponse)
 async def run_simulation_endpoint(
     project_id: str,
     request: SimulationRequest,
