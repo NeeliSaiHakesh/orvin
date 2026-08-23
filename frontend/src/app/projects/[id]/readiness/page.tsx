@@ -179,19 +179,19 @@ Signed-Off By: AutoMLOps Automated Governance Engine
 
   // Plotly Radar / Spider Chart data
   const getRadarPlotData = () => {
-    if (!data?.radar_data) return [];
+    if (!data?.radar_data || data.radar_data.length === 0) return [];
     const rValues = data.radar_data.map(p => p.score_percentage);
     const thetaValues = data.radar_data.map(p => p.pillar_name);
 
-    // Close the polygon
-    rValues.push(rValues[0]);
-    thetaValues.push(thetaValues[0]);
+    // Close the polygon cleanly without mutating original arrays
+    const closedR = [...rValues, rValues[0]];
+    const closedTheta = [...thetaValues, thetaValues[0]];
 
     return [
       {
         type: 'scatterpolar' as const,
-        r: rValues,
-        theta: thetaValues,
+        r: closedR,
+        theta: closedTheta,
         fill: 'toself' as const,
         name: 'Model Readiness',
         fillcolor: 'rgba(6, 182, 212, 0.25)',
