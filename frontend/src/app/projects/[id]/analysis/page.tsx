@@ -6,6 +6,7 @@ import { Sparkles, AlertTriangle, BarChart3, Hash, Search, Loader2 } from 'lucid
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { DatasetSelector } from '@/components/ui/DatasetSelector';
 import { api } from '@/lib/api';
 
 interface AnalysisReport {
@@ -32,6 +33,29 @@ export default function AnalysisPage() {
     loadDatasets();
   }, [projectId]);
 
+  const loadDatasetReport = async (datasetId: string) => {
+    try {
+      setAnalyzing(true);
+      setError(null);
+      try {
+        const reportData = await api.analysis.getReport(datasetId);
+        setReport(reportData);
+      } catch {
+        const result = await api.analysis.analyze(datasetId);
+        setReport(result);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to load analysis for selected dataset');
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const handleDatasetSelect = (datasetId: string) => {
+    setSelectedDataset(datasetId);
+    loadDatasetReport(datasetId);
+  };
+
   const loadDatasets = async () => {
     try {
       setAnalyzing(true);
@@ -40,14 +64,7 @@ export default function AnalysisPage() {
       setDatasets(list);
       if (list.length > 0) {
         setSelectedDataset(list[0].id);
-        try {
-          const reportData = await api.analysis.getReport(list[0].id);
-          setReport(reportData);
-        } catch {
-          // Auto-analyze on the fly if report not generated yet
-          const result = await api.analysis.analyze(list[0].id);
-          setReport(result);
-        }
+        await loadDatasetReport(list[0].id);
       }
     } catch {
       setDatasets([]);
@@ -98,19 +115,27 @@ export default function AnalysisPage() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold font-heading mb-2">Data Analysis</h1>
-          <p className="text-gray-400">Automated dataset profiling and insights.</p>
+          <p className="text-gray-400">Automated dataset profiling, correlations, and distributions.</p>
         </div>
         <Button onClick={runAnalysis} disabled={analyzing || !selectedDataset}>
           {analyzing ? (
             <><Loader2 className="w-4 h-4 animate-spin" /> Profiling...</>
           ) : (
-            <><Search className="w-4 h-4" /> Run Analysis</>
+            <><Search className="w-4 h-4" /> Re-Analyze Dataset</>
           )}
         </Button>
       </div>
+
+      <DatasetSelector
+        datasets={datasets}
+        selectedDatasetId={selectedDataset}
+        onSelect={handleDatasetSelect}
+        projectId={projectId}
+        label="Dataset Under Analysis"
+      />
 
       {error && (
         <div className="glass border-red-500/30 bg-red-500/10 p-4 rounded-xl text-red-400">{error}</div>

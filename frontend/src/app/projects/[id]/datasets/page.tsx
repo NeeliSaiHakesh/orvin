@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Database, Upload, Eye, Trash2, FileSpreadsheet, FileJson } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
@@ -127,10 +128,25 @@ export default function DatasetsPage() {
       render: (item: Dataset) => <span className="text-xs text-gray-300 font-mono">{formatUploadDate(item.uploaded_at)}</span>
     },
     {
-      key: 'actions', header: '',
+      key: 'actions', header: 'Quick Actions',
       render: (item: Dataset) => (
-        <div className="flex gap-2">
-          <Button size="sm" variant="ghost" onClick={() => handleDelete(item.id)}>
+        <div className="flex items-center gap-1.5 justify-end">
+          <Link href={`/projects/${projectId}/analysis`}>
+            <button className="px-2.5 py-1 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-medium transition-colors">
+              Analyze
+            </button>
+          </Link>
+          <Link href={`/projects/${projectId}/cleaning`}>
+            <button className="px-2.5 py-1 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs font-medium transition-colors">
+              Clean
+            </button>
+          </Link>
+          <Link href={`/projects/${projectId}/training`}>
+            <button className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-medium transition-colors">
+              Train
+            </button>
+          </Link>
+          <Button size="sm" variant="ghost" onClick={() => handleDelete(item.id)} title="Delete Dataset">
             <Trash2 className="w-4 h-4 text-red-400" />
           </Button>
         </div>

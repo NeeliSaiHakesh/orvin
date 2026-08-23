@@ -5,6 +5,7 @@ import { Check, X, ArrowRight, Sparkles, Loader2, Wand2 } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { DatasetSelector } from '@/components/ui/DatasetSelector';
 import { api } from '@/lib/api';
 
 interface CleaningSuggestion {
@@ -43,6 +44,12 @@ export default function CleaningPage() {
     const initial: Record<string, boolean> = {};
     list.forEach(s => { initial[s.step_name] = true; });
     setApprovedSteps(initial);
+  };
+
+  const handleDatasetSelect = (datasetId: string) => {
+    setSelectedDataset(datasetId);
+    setApplied(false);
+    fetchSuggestions(datasetId);
   };
 
   const loadDatasets = async () => {
@@ -121,19 +128,27 @@ export default function CleaningPage() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold font-heading mb-2">AI Data Cleaning</h1>
-          <p className="text-gray-400">Review, customize, and apply AI-suggested cleaning steps.</p>
+          <p className="text-gray-400">Review, customize, and apply AI-suggested cleaning steps per dataset.</p>
         </div>
         <Button onClick={applyCleaning} disabled={applying || loading} className="flex items-center gap-2">
           {applying ? (
-            <><Loader2 className="w-4 h-4 animate-spin" /> Cleaning...</>
+            <><Loader2 className="w-4 h-4 animate-spin" /> Applying...</>
           ) : (
-            <><Sparkles className="w-4 h-4" /> Apply Selected Cleaning</>
+            <><Wand2 className="w-4 h-4" /> Apply Cleaning Pipeline</>
           )}
         </Button>
       </div>
+
+      <DatasetSelector
+        datasets={datasets}
+        selectedDatasetId={selectedDataset}
+        onSelect={handleDatasetSelect}
+        projectId={projectId}
+        label="Dataset Being Cleaned"
+      />
 
       {error && (
         <div className="glass border-red-500/30 bg-red-500/10 p-4 rounded-xl text-red-400">{error}</div>

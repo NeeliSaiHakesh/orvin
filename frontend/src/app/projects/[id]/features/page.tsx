@@ -5,6 +5,7 @@ import { Plot } from '@/components/ui/Plot';
 import { Wand2, Loader2, BarChart3, CheckCircle2 } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { DatasetSelector } from '@/components/ui/DatasetSelector';
 import { api } from '@/lib/api';
 
 export default function FeaturesPage() {
@@ -20,6 +21,11 @@ export default function FeaturesPage() {
   useEffect(() => {
     loadDatasets();
   }, [projectId]);
+
+  const handleDatasetSelect = (datasetId: string) => {
+    setSelectedDataset(datasetId);
+    fetchFeatures(datasetId);
+  };
 
   const loadDatasets = async () => {
     try {
@@ -91,21 +97,42 @@ export default function FeaturesPage() {
       y: names,
       type: 'bar' as const,
       orientation: 'h' as const,
-      marker: { color: values, colorscale: [[0, '#06B6D4'], [1, '#8B5CF6']] }
+      marker: {
+        color: '#22D3EE',
+      }
     };
+  };
+
+  const plotLayout = {
+    paper_bgcolor: 'transparent',
+    plot_bgcolor: 'transparent',
+    font: { color: '#F9FAFB', size: 11 },
+    margin: { t: 20, b: 40, l: 150, r: 20 },
   };
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold font-heading mb-2">Automated Feature Engineering</h1>
-          <p className="text-gray-400">AI-generated features, categorical encodings, scaling, and feature rankings.</p>
+          <h1 className="text-3xl font-bold font-heading mb-2">Feature Engineering</h1>
+          <p className="text-gray-400">Automated feature encoding, scaling, transformations, and importance ranking.</p>
         </div>
-        <Button onClick={runEngineering} disabled={engineering || !selectedDataset} className="flex items-center gap-2">
-          {engineering ? <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</> : <><Wand2 className="w-4 h-4" /> Run Feature Engineering</>}
+        <Button onClick={runEngineering} disabled={engineering || loading || !selectedDataset} className="flex items-center gap-2">
+          {engineering ? (
+            <><Loader2 className="w-4 h-4 animate-spin" /> Engineering...</>
+          ) : (
+            <><Wand2 className="w-4 h-4" /> Re-Engineer Features</>
+          )}
         </Button>
       </div>
+
+      <DatasetSelector
+        datasets={datasets}
+        selectedDatasetId={selectedDataset}
+        onSelect={handleDatasetSelect}
+        projectId={projectId}
+        label="Dataset For Feature Pipeline"
+      />
 
       {error && (
         <div className="glass border-red-500/30 bg-red-500/10 p-4 rounded-xl text-red-400">{error}</div>

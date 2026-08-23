@@ -32,8 +32,13 @@ async def start_training(project_id: str, config: TrainingConfig, db: AsyncSessi
         await db.commit()
         await db.refresh(project)
         
-    ds_res = await db.execute(select(Dataset).filter(Dataset.project_id == project_id).order_by(Dataset.uploaded_at.desc()))
-    dataset = ds_res.scalars().first()
+    if config.dataset_id:
+        ds_res = await db.execute(select(Dataset).filter(Dataset.id == config.dataset_id))
+        dataset = ds_res.scalars().first()
+    else:
+        ds_res = await db.execute(select(Dataset).filter(Dataset.project_id == project_id).order_by(Dataset.uploaded_at.desc()))
+        dataset = ds_res.scalars().first()
+
     if not dataset:
         raise HTTPException(status_code=400, detail="No dataset found for project")
         

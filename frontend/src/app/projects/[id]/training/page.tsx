@@ -5,6 +5,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { DataTable } from '@/components/ui/DataTable';
 import { Badge } from '@/components/ui/Badge';
+import { DatasetSelector } from '@/components/ui/DatasetSelector';
 import { api } from '@/lib/api';
 import { useParams } from 'next/navigation';
 
@@ -19,6 +20,8 @@ interface ModelResult {
 export default function TrainingPage() {
   const params = useParams();
   const projectId = params.id as string;
+  const [datasets, setDatasets] = useState<any[]>([]);
+  const [selectedDataset, setSelectedDataset] = useState<string | null>(null);
   const [isTraining, setIsTraining] = useState(false);
   const [progress, setProgress] = useState(0);
   const [leaderboard, setLeaderboard] = useState<ModelResult[]>([]);
@@ -27,7 +30,21 @@ export default function TrainingPage() {
 
   useEffect(() => {
     loadLeaderboard();
+    loadDatasets();
   }, [projectId]);
+
+  const loadDatasets = async () => {
+    try {
+      const data = await api.datasets.list(projectId);
+      const list = Array.isArray(data) ? data : [];
+      setDatasets(list);
+      if (list.length > 0) {
+        setSelectedDataset(list[0].id);
+      }
+    } catch {
+      setDatasets([]);
+    }
+  };
 
   const loadLeaderboard = async () => {
     try {
@@ -56,6 +73,7 @@ export default function TrainingPage() {
         test_size: 0.2,
         cv_folds: 5,
         scoring_metric: 'auto',
+        dataset_id: selectedDataset || undefined,
       });
 
       clearInterval(progressInterval);
@@ -158,12 +176,12 @@ export default function TrainingPage() {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold font-heading mb-2">Model Training</h1>
-          <p className="text-gray-400">AutoML engine — train, compare, and select the best model.</p>
+          <p className="text-gray-400">AutoML engine — train, compare, and select the best model per dataset.</p>
         </div>
-        <Button onClick={startTraining} disabled={isTraining} className="flex items-center gap-2">
+        <Button onClick={startTraining} disabled={isTraining || !selectedDataset} className="flex items-center gap-2">
           {isTraining ? (
             <>
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -176,6 +194,14 @@ export default function TrainingPage() {
           )}
         </Button>
       </div>
+
+      <DatasetSelector
+        datasets={datasets}
+        selectedDatasetId={selectedDataset}
+        onSelect={(id) => setSelectedDataset(id)}
+        projectId={projectId}
+        label="Dataset Being Trained On"
+      />
 
       {error && (
         <div className="glass border-red-500/30 bg-red-500/10 p-4 rounded-xl text-red-400">

@@ -7,6 +7,7 @@ class TrainingConfig(BaseModel):
     cv_folds: int = 5
     scoring_metric: str = 'auto'
     models_to_train: Optional[List[str]] = None
+    dataset_id: Optional[str] = None
 
 class TrainedModelResponse(BaseModel):
     id: str
