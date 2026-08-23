@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
-import { HydrationGuard } from "@/components/HydrationGuard";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
@@ -19,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${outfit.variable} bg-[#0a0a1a] text-[#F9FAFB] antialiased min-h-screen flex flex-col`}>
-        <HydrationGuard>{children}</HydrationGuard>
+        {children}
       </body>
     </html>
   );
