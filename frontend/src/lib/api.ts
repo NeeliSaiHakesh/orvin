@@ -281,4 +281,21 @@ export const api = {
         body: JSON.stringify(payload),
       }),
   },
+
+  // ── Self-Healing Pipeline ──
+  selfHealing: {
+    getStatus: (projectId: string) =>
+      fetchAPI(`/projects/${projectId}/self-healing/status`),
+
+    trigger: (projectId: string, failureType: string) =>
+      fetchAPI(`/projects/${projectId}/self-healing/trigger`, {
+        method: 'POST',
+        body: JSON.stringify({ failure_type: failureType, simulation_mode: true }),
+      }),
+
+    resetCircuitBreaker: (projectId: string) =>
+      fetchAPI(`/projects/${projectId}/self-healing/circuit-breaker/reset`, {
+        method: 'POST',
+      }),
+  },
 };
