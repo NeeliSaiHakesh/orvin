@@ -172,7 +172,7 @@
 
 | Feature | Description | Status |
 |---|---|---|
-| **AI MLOps Decision Engine** | Analyzes project and dataset characteristics; recommends preprocessing, ML algorithms, deployment, and monitoring strategies; provides reasoning behind each recommendation. | 🔄 In Progress |
+| **AI MLOps Decision Engine** | Analyzes project and dataset characteristics; recommends preprocessing, ML algorithms, deployment, and monitoring strategies; provides reasoning behind each recommendation. | ✅ Active |
 | **What-If Model Simulator** | Allows users to test alternative models, features, and hyperparameters; compares baseline vs. hypothetical configurations; shows expected performance and cost impact. | 🔄 In Progress |
 | **Self-Healing Pipeline** | Detects container failures, resource spikes, and drift violations; automatically performs recovery actions (restart, scaling, retraining); includes retry limits and safety controls. | 🔄 In Progress |
 | **Cost & Carbon Optimizer** | Estimates cloud infrastructure cost and carbon footprint; compares AWS, Azure, GCP, and on-premise configurations; recommends optimizations to reduce cost and energy consumption. | 🔄 In Progress |
@@ -195,7 +195,7 @@
 | **AI Assistant** | RAG/Context-aware MLOps Copilot | ✅ Production Ready | 100% |
 | **Containers & DevOps** | Docker Compose, Dockerfiles, K8s generation | 🔄 Actively Expanding | 75% |
 | **Monitoring & Drift** | Prometheus, Evidently, Retraining hooks | 🔄 In Roadmap | 25% |
-| **AI Optimization & Reliability** | Decision Engine, Simulator, Self-Healing, Cost Optimizer, Health Score | 🔄 In Progress | 15% |
+| **AI Optimization & Reliability** | Decision Engine, Simulator, Self-Healing, Cost Optimizer, Health Score | 🔄 In Progress | 35% |
 
 ---
 

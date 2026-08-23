@@ -254,4 +254,17 @@ export const api = {
     suggestions: (projectId: string) =>
       fetchAPI(`/projects/${projectId}/assistant/suggestions`),
   },
+
+  // ── AI Decision Engine ──
+  decision: {
+    get: (projectId: string, datasetId?: string) => {
+      const q = datasetId ? `?dataset_id=${encodeURIComponent(datasetId)}` : '';
+      return fetchAPI(`/projects/${projectId}/decisions${q}`);
+    },
+
+    generate: (projectId: string, datasetId?: string) => {
+      const q = datasetId ? `?dataset_id=${encodeURIComponent(datasetId)}` : '';
+      return fetchAPI(`/projects/${projectId}/decisions/generate${q}`, { method: 'POST' });
+    },
+  },
 };

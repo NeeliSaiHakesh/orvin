@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { 
   LayoutDashboard, Database, BarChart2, Wand2, 
   Dna, Cpu, Share2, FileCode2, Settings, Bot,
-  Plus, ArrowLeft, FolderPlus
+  Plus, ArrowLeft, FolderPlus, BrainCircuit, Sparkles
 } from 'lucide-react';
 import { useUIStore } from '@/lib/store';
 
@@ -21,6 +21,7 @@ export function Sidebar({ projectId }: { projectId?: string }) {
   const projectLinks = projectId ? [
     { name: 'Overview', href: `/projects/${projectId}`, icon: <LayoutDashboard /> },
     { name: 'Datasets', href: `/projects/${projectId}/datasets`, icon: <Database /> },
+    { name: 'AI Decision', href: `/projects/${projectId}/decision`, icon: <BrainCircuit className="text-cyan-400" /> },
     { name: 'Analysis', href: `/projects/${projectId}/analysis`, icon: <BarChart2 /> },
     { name: 'Cleaning', href: `/projects/${projectId}/cleaning`, icon: <Wand2 /> },
     { name: 'Features', href: `/projects/${projectId}/features`, icon: <Dna /> },
