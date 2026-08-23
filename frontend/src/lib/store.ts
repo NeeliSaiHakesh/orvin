@@ -18,6 +18,8 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  _hydrated: boolean;
+  hydrate: () => void;
   login: (token: string, user: User) => void;
   logout: () => void;
   setUser: (user: User) => void;
@@ -37,48 +39,43 @@ interface UIState {
   setLoading: (loading: boolean) => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => {
-  let initialToken: string | null = null;
-  let initialUser: User | null = null;
-
-  if (typeof window !== 'undefined') {
-    initialToken = localStorage.getItem('token');
+// Auth store — starts with null to match SSR, hydrates from localStorage on client
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+  token: null,
+  isAuthenticated: false,
+  _hydrated: false,
+  hydrate: () => {
+    if (typeof window === 'undefined') return;
+    const token = localStorage.getItem('token');
+    let user: User | null = null;
     try {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        initialUser = JSON.parse(storedUser);
-      }
-    } catch {
-      initialUser = null;
+      const stored = localStorage.getItem('user');
+      if (stored) user = JSON.parse(stored);
+    } catch { /* ignore */ }
+    set({ token, user, isAuthenticated: !!token, _hydrated: true });
+  },
+  login: (token, user) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
     }
-  }
-
-  return {
-    user: initialUser,
-    token: initialToken,
-    isAuthenticated: !!initialToken,
-    login: (token, user) => {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('token', token);
-        localStorage.setItem('user', JSON.stringify(user));
-      }
-      set({ token, user, isAuthenticated: true });
-    },
-    logout: () => {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-      }
-      set({ token: null, user: null, isAuthenticated: false });
-    },
-    setUser: (user) => {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('user', JSON.stringify(user));
-      }
-      set({ user });
-    },
-  };
-});
+    set({ token, user, isAuthenticated: true });
+  },
+  logout: () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
+    set({ token: null, user: null, isAuthenticated: false });
+  },
+  setUser: (user) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('user', JSON.stringify(user));
+    }
+    set({ user });
+  },
+}));
 
 export const useProjectStore = create<ProjectState>((set) => ({
   projects: [],
