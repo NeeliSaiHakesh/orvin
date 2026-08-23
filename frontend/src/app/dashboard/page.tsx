@@ -13,6 +13,7 @@ export default function DashboardPage() {
   const { user } = useAuthStore();
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadProjects();
@@ -21,14 +22,15 @@ export default function DashboardPage() {
   const loadProjects = async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await api.projects.list();
       if (Array.isArray(data)) {
         setProjects(data);
       } else {
         setProjects([]);
       }
-    } catch {
-      // If backend is fresh or empty
+    } catch (err: any) {
+      setError(err.message || 'Failed to load projects from server');
       setProjects([]);
     } finally {
       setLoading(false);

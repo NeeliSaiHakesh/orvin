@@ -33,13 +33,13 @@ export default function NewProjectPage() {
         target_column: targetColumn.trim() || undefined,
       });
 
-      // Redirect to newly created project's dataset page
-      const projectId = project.id || 'demo-' + Date.now();
-      router.push(`/projects/${projectId}/datasets`);
+      if (project && project.id) {
+        router.push(`/projects/${project.id}/datasets`);
+      } else {
+        throw new Error('Project was created but did not return a valid ID');
+      }
     } catch (err: any) {
-      // If backend API fails or auth is not logged in, fallback gracefully to demo ID so user can test UI
-      const demoId = 'proj-' + Math.random().toString(36).substring(2, 9);
-      router.push(`/projects/${demoId}/datasets`);
+      setError(err.message || 'Failed to create project. Please verify you are logged in.');
     } finally {
       setLoading(false);
     }
