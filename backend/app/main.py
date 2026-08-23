@@ -48,6 +48,13 @@ for pfx in ["/api/v1", "/api"]:
 @app.on_event("startup")
 async def startup_event():
     await init_db()
+    try:
+        from app.database import AsyncSessionLocal
+        from app.seed import seed_demo_data
+        async with AsyncSessionLocal() as session:
+            await seed_demo_data(session)
+    except Exception as e:
+        print(f"[STARTUP] Seeding check info: {e}")
 
 @app.get("/health")
 async def health_check():

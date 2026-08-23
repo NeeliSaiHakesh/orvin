@@ -25,3 +25,4 @@ class TrainedModelResponse(BaseModel):
 class LeaderboardResponse(BaseModel):
     models: List[TrainedModelResponse]
     best_model_id: Optional[str] = None
+    dataset_stats: Optional[Dict[str, Any]] = None
