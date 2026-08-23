@@ -21,6 +21,7 @@ export function Plot({
   const containerRef = useRef<HTMLDivElement>(null);
   const [plotlyInstance, setPlotlyInstance] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const renderTimeoutRef = useRef<any>(null);
 
   // Load Plotly safely on client side once
   useEffect(() => {
@@ -46,57 +47,74 @@ export function Plot({
     };
   }, []);
 
-  // Render / Update plot whenever data, layout, or instance changes
+  // Render / Update plot with debounce to prevent UI freezes
   useEffect(() => {
     if (!plotlyInstance || !containerRef.current || !data) return;
 
-    const mergedLayout = {
-      paper_bgcolor: 'transparent',
-      plot_bgcolor: 'transparent',
-      font: { color: '#F9FAFB', size: 11 },
-      margin: { t: 30, b: 40, l: 50, r: 20 },
-      autosize: true,
-      ...layout,
-    };
-
-    const mergedConfig = {
-      responsive: true,
-      displayModeBar: false,
-      ...config,
-    };
-
-    try {
-      plotlyInstance.react(containerRef.current, data, mergedLayout, mergedConfig);
-    } catch (err) {
-      console.warn('Plotly render update warning:', err);
+    if (renderTimeoutRef.current) {
+      cancelAnimationFrame(renderTimeoutRef.current);
     }
+
+    renderTimeoutRef.current = requestAnimationFrame(() => {
+      if (!containerRef.current || !plotlyInstance) return;
+
+      const mergedLayout = {
+        paper_bgcolor: 'transparent',
+        plot_bgcolor: 'transparent',
+        font: { color: '#F9FAFB', size: 11 },
+        margin: { t: 30, b: 40, l: 50, r: 20 },
+        autosize: true,
+        ...layout,
+      };
+
+      const mergedConfig = {
+        responsive: true,
+        displayModeBar: false,
+        ...config,
+      };
+
+      try {
+        plotlyInstance.react(containerRef.current, data, mergedLayout, mergedConfig);
+      } catch (err) {
+        console.warn('Plotly render warning:', err);
+      }
+    });
+
+    return () => {
+      if (renderTimeoutRef.current) {
+        cancelAnimationFrame(renderTimeoutRef.current);
+      }
+    };
   }, [plotlyInstance, data, layout, config]);
 
-  // Window resize observer
+  // Window resize handler (debounced, without circular ResizeObserver)
   useEffect(() => {
     if (!plotlyInstance || !containerRef.current || !useResizeHandler) return;
 
+    let resizeTimer: any;
     const handleResize = () => {
-      if (containerRef.current && plotlyInstance) {
-        plotlyInstance.Plots.resize(containerRef.current);
-      }
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (containerRef.current && plotlyInstance) {
+          try {
+            plotlyInstance.Plots.resize(containerRef.current);
+          } catch {
+            // ignore resize if unmounting
+          }
+        }
+      }, 150);
     };
 
-    const resizeObserver = new ResizeObserver(() => {
-      handleResize();
-    });
-
-    resizeObserver.observe(containerRef.current);
     window.addEventListener('resize', handleResize);
 
     return () => {
-      resizeObserver.disconnect();
+      clearTimeout(resizeTimer);
       window.removeEventListener('resize', handleResize);
       if (containerRef.current && plotlyInstance) {
         try {
           plotlyInstance.purge(containerRef.current);
         } catch {
-          // ignore purge on unmount
+          // ignore purge
         }
       }
     };
