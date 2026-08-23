@@ -49,7 +49,7 @@ export default function DashboardPage() {
       {/* Welcome Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold font-heading mb-2 text-white">
+          <h1 suppressHydrationWarning className="text-3xl font-bold font-heading mb-2 text-white">
             Welcome back, {user?.name || user?.email?.split('@')[0] || 'Engineer'}!
           </h1>
           <p className="text-gray-400">Manage your machine learning pipelines and models.</p>

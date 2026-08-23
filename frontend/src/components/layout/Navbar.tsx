@@ -210,10 +210,12 @@ export function Navbar() {
         
         {/* User Profile */}
         <div className="flex items-center gap-3 pl-4 border-l border-white/10">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 flex items-center justify-center text-sm font-bold text-white shadow-lg">
+          <div suppressHydrationWarning className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 flex items-center justify-center text-sm font-bold text-white shadow-lg">
             {user?.name?.charAt(0).toUpperCase() || 'U'}
           </div>
-          <span className="text-sm font-medium hidden sm:inline-block text-gray-200">{user?.name || 'User'}</span>
+          <span suppressHydrationWarning className="text-sm font-medium hidden sm:inline-block text-gray-200">
+            {user?.name || 'User'}
+          </span>
           <button onClick={handleLogout} className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors" title="Logout">
             <LogOut className="w-4 h-4" />
           </button>
