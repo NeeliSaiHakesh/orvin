@@ -3,6 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import update
 import pandas as pd
+import os
+from app.config import settings
 from app.database import get_db
 from app.core.dependencies import get_current_user
 from app.models.user import User
