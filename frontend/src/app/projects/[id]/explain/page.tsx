@@ -55,26 +55,49 @@ export default function ExplainPage() {
     margin: { t: 30, b: 40, l: 120, r: 20 },
   };
 
+  const getModelLabel = (m: any, index: number) => {
+    const metricScore = m.metrics?.accuracy 
+      ? `Accuracy: ${(m.metrics.accuracy * 100).toFixed(1)}%` 
+      : (m.metrics?.r2 ? `R²: ${m.metrics.r2.toFixed(3)}` : (m.metrics?.cv_score ? `CV: ${m.metrics.cv_score.toFixed(3)}` : `Model #${index + 1}`));
+    
+    const bestTag = m.is_selected ? ' ⭐ [Best]' : '';
+    const shortId = m.id ? `(ID: ${m.id.substring(0, 6)})` : '';
+    return `${m.algorithm || 'Algorithm'} — ${metricScore} ${shortId}${bestTag}`;
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold font-heading mb-2">Explainable AI</h1>
-          <p className="text-gray-400">Understand why your model makes predictions.</p>
+          <h1 className="text-3xl font-bold font-heading mb-1">Explainable AI & SHAP</h1>
+          <p className="text-gray-400 text-sm">Understand feature contributions, decision boundaries, and model fairness.</p>
         </div>
-        <div className="flex items-center gap-3">
-          {models.length > 0 && (
-            <select
-              value={selectedModel || ''}
-              onChange={(e) => setSelectedModel(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500"
-            >
-              {models.map((m: any) => (
-                <option key={m.id} value={m.id}>{m.algorithm} {m.is_selected ? '(Best)' : ''}</option>
-              ))}
-            </select>
+        
+        <div className="flex flex-wrap items-center gap-3">
+          {models.length > 0 ? (
+            <div className="relative">
+              <select
+                value={selectedModel || ''}
+                onChange={(e) => setSelectedModel(e.target.value)}
+                className="bg-[#0f172a] text-gray-100 border border-purple-500/40 rounded-xl px-4 py-2.5 text-sm font-medium shadow-xl hover:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 appearance-none pr-10 cursor-pointer min-w-[280px]"
+              >
+                {models.map((m: any, idx: number) => (
+                  <option key={m.id || idx} value={m.id} className="bg-[#0f172a] text-gray-100 py-2">
+                    {getModelLabel(m, idx)}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-purple-400">
+                ▼
+              </div>
+            </div>
+          ) : (
+            <span className="text-xs text-gray-500 font-mono bg-white/5 border border-white/10 px-3 py-2 rounded-xl">
+              No trained models available
+            </span>
           )}
-          <Button onClick={loadExplanation} disabled={loading || !selectedModel}>
+          
+          <Button onClick={loadExplanation} disabled={loading || !selectedModel} className="flex items-center gap-2">
             {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Explaining...</> : <><BrainCircuit className="w-4 h-4" /> Explain Model</>}
           </Button>
         </div>
