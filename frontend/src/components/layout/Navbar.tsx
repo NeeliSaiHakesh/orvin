@@ -3,7 +3,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   BrainCircuit, Menu, Bell, User, LogOut, 
-  CheckCircle2, Cpu, Database, Bot, Sparkles, X, Trash2
+  CheckCircle2, Cpu, Database, Bot, Sparkles, X, Trash2,
+  Plus, FolderGit2
 } from 'lucide-react';
 import { useAuthStore, useUIStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
@@ -108,9 +109,23 @@ export function Navbar() {
           <BrainCircuit className="text-cyan-400" />
           <span className="gradient-text hidden sm:inline-block">AutoMLOps</span>
         </Link>
+        <Link 
+          href="/dashboard" 
+          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+        >
+          <FolderGit2 className="w-3.5 h-3.5 text-purple-400" />
+          <span>Projects</span>
+        </Link>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
+        <Link href="/projects/new">
+          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white text-xs font-semibold shadow-md transition-all">
+            <Plus className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">New Project</span>
+          </button>
+        </Link>
+
         {/* Notifications Button & Dropdown */}
         <div className="relative" ref={notifRef}>
           <button 
