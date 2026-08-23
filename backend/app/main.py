@@ -1,5 +1,14 @@
+import sys
+import os
+
+# Guarantee current backend directory is at front of Python path for reliable imports on Render/Linux
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+
 from fastapi import FastAPI  # type: ignore
 from fastapi.middleware.cors import CORSMiddleware  # type: ignore
+
 try:
     from app.config import settings
     from app.database import init_db
@@ -15,10 +24,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Robust CORS middleware supporting all local frontend ports (3000, 3001, etc.)
+# Open CORS middleware allowing local development, Render, and Vercel domains
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"http://(localhost|127\.0\.0\.1)(:\d+)?",
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
