@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { UploadCloud, File, X, CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from './Button';
@@ -29,27 +29,10 @@ export function FileUpload({
   const [isDone, setIsDone] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      setFile(acceptedFiles[0]);
-      setIsDone(false);
-      setProgress(0);
-      setErrorMessage(null);
-    }
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
-    onDrop,
-    accept,
-    maxSize,
-    multiple: false
-  });
-
-  const handleUpload = async () => {
-    if (!file) return;
+  const startUpload = async (targetFile: File) => {
     setIsUploading(true);
     setErrorMessage(null);
-    setProgress(20);
+    setProgress(25);
 
     const interval = setInterval(() => {
       setProgress(p => (p < 90 ? p + 15 : p));
@@ -57,20 +40,40 @@ export function FileUpload({
 
     try {
       if (onUpload) {
-        await onUpload(file);
+        await onUpload(targetFile);
       } else if (onDropProp) {
-        await onDropProp([file]);
+        await onDropProp([targetFile]);
       }
       clearInterval(interval);
       setProgress(100);
       setIsDone(true);
     } catch (err: any) {
       clearInterval(interval);
-      setErrorMessage(err?.message || "Upload failed");
+      setErrorMessage(err?.message || "Upload failed. Please retry.");
+      setIsDone(false);
     } finally {
       setIsUploading(false);
     }
   };
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      const selected = acceptedFiles[0];
+      setFile(selected);
+      setIsDone(false);
+      setProgress(0);
+      setErrorMessage(null);
+      // Auto-trigger upload immediately
+      startUpload(selected);
+    }
+  }, [onUpload, onDropProp]);
+
+  const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
+    onDrop,
+    accept,
+    maxSize,
+    multiple: false
+  });
 
   return (
     <div className="w-full space-y-3">
@@ -99,7 +102,7 @@ export function FileUpload({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-purple-500/20 text-purple-400 rounded-lg">
-                {isDone ? <CheckCircle2 className="text-green-400 w-5 h-5" /> : <File className="w-5 h-5" />}
+                {isDone ? <CheckCircle2 className="text-green-400 w-5 h-5" /> : (isUploading ? <Loader2 className="w-5 h-5 animate-spin text-cyan-400" /> : <File className="w-5 h-5" />)}
               </div>
               <div>
                 <h4 className="font-medium text-sm text-white">{file.name}</h4>
@@ -107,33 +110,40 @@ export function FileUpload({
               </div>
             </div>
             
-            {!isUploading && !loading && !isDone && (
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={() => setFile(null)}>
-                  <X className="w-4 h-4" />
-                </Button>
-                <Button onClick={handleUpload} size="sm">Upload</Button>
-              </div>
-            )}
-            
-            {(isUploading || loading) && (
-              <span className="text-xs font-medium text-cyan-400 flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" /> Uploading...
-              </span>
-            )}
-            
-            {isDone && (
-              <Button variant="ghost" size="sm" onClick={() => { setFile(null); setIsDone(false); }}>
-                Upload Another
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {isDone ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
+                    <CheckCircle2 className="w-4 h-4" /> Uploaded & Ingested
+                  </span>
+                  <Button variant="ghost" size="sm" onClick={() => { setFile(null); setIsDone(false); }}>
+                    Upload Another
+                  </Button>
+                </div>
+              ) : (isUploading || loading) ? (
+                <span className="text-xs font-medium text-cyan-400 flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" /> Ingesting Data...
+                </span>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => setFile(null)}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                  <Button onClick={() => startUpload(file)} size="sm">Retry Upload</Button>
+                </div>
+              )}
+            </div>
           </div>
 
           {errorMessage && (
-            <p className="text-xs text-red-400 mt-2">{errorMessage}</p>
+            <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg mt-3 text-xs text-red-400">
+              {errorMessage}
+            </div>
           )}
         </div>
       )}
     </div>
   );
 }
+
+export default FileUpload;
