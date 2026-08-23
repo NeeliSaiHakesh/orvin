@@ -19,10 +19,8 @@ interface NotificationItem {
 
 export function Navbar() {
   const { toggleSidebar } = useUIStore();
-  const { user, logout, hydrate } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const router = useRouter();
-
-  useEffect(() => { hydrate(); }, [hydrate]);
   
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([

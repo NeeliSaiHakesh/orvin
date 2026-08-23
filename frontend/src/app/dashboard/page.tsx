@@ -10,12 +10,11 @@ import { Badge } from '@/components/ui/Badge';
 import { api } from '@/lib/api';
 
 export default function DashboardPage() {
-  const { user, hydrate } = useAuthStore();
+  const { user } = useAuthStore();
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    hydrate();
     loadProjects();
   }, []);
 
