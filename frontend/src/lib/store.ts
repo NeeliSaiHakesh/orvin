@@ -37,20 +37,48 @@ interface UIState {
   setLoading: (loading: boolean) => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
-  isAuthenticated: typeof window !== 'undefined' ? !!localStorage.getItem('token') : false,
-  login: (token, user) => {
-    localStorage.setItem('token', token);
-    set({ token, user, isAuthenticated: true });
-  },
-  logout: () => {
-    localStorage.removeItem('token');
-    set({ token: null, user: null, isAuthenticated: false });
-  },
-  setUser: (user) => set({ user }),
-}));
+export const useAuthStore = create<AuthState>((set) => {
+  let initialToken: string | null = null;
+  let initialUser: User | null = null;
+
+  if (typeof window !== 'undefined') {
+    initialToken = localStorage.getItem('token');
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        initialUser = JSON.parse(storedUser);
+      }
+    } catch {
+      initialUser = null;
+    }
+  }
+
+  return {
+    user: initialUser,
+    token: initialToken,
+    isAuthenticated: !!initialToken,
+    login: (token, user) => {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+      set({ token, user, isAuthenticated: true });
+    },
+    logout: () => {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
+      set({ token: null, user: null, isAuthenticated: false });
+    },
+    setUser: (user) => {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+      set({ user });
+    },
+  };
+});
 
 export const useProjectStore = create<ProjectState>((set) => ({
   projects: [],

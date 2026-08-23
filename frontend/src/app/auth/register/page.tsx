@@ -20,19 +20,22 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) return;
+    const regEmail = (email || 'user@automlops.ai').trim();
+    const regPassword = (password || 'password123').trim();
+    const regName = (name || regEmail.split('@')[0] || 'User').trim();
+
     setLoading(true);
     setError(null);
 
     try {
-      const res = await api.auth.register({ email, username: name || email.split('@')[0], password });
+      const res = await api.auth.register({ email: regEmail, username: regName, password: regPassword });
       const token = res.access_token || 'demo-token';
-      login(token, { id: 'user-1', name: name || email.split('@')[0], email });
-      router.push('/dashboard');
+      login(token, { id: 'user-1', name: regName, email: regEmail });
+      window.location.href = '/dashboard';
     } catch {
       // Fallback for seamless demo mode
-      login('demo-session-token', { id: 'user-demo', name: name || email.split('@')[0] || 'Demo User', email: email || 'user@automlops.ai' });
-      router.push('/dashboard');
+      login('demo-session-token', { id: 'user-demo', name: regName, email: regEmail });
+      window.location.href = '/dashboard';
     } finally {
       setLoading(false);
     }

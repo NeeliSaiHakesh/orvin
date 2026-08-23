@@ -12,29 +12,37 @@ import { api } from '@/lib/api';
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuthStore();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('demo@automlops.ai');
+  const [password, setPassword] = useState('password123');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) return;
+  const handleLogin = async (loginEmail?: string, loginPassword?: string) => {
+    const finalEmail = (loginEmail || email || 'demo@automlops.ai').trim();
+    const finalPassword = (loginPassword || password || 'password123').trim();
+    
     setLoading(true);
     setError(null);
 
     try {
-      const res = await api.auth.login({ email, password });
+      const res = await api.auth.login({ email: finalEmail, password: finalPassword });
       const token = res.access_token || 'demo-token';
-      login(token, { id: 'user-1', name: email.split('@')[0], email });
-      router.push('/dashboard');
+      const userName = finalEmail.split('@')[0] || 'Demo User';
+      login(token, { id: 'user-1', name: userName, email: finalEmail });
+      window.location.href = '/dashboard';
     } catch {
-      // Fallback for seamless demo mode
-      login('demo-session-token', { id: 'user-demo', name: email.split('@')[0] || 'Demo User', email: email || 'user@automlops.ai' });
-      router.push('/dashboard');
+      // Seamless demo fallback
+      const userName = finalEmail.split('@')[0] || 'Demo User';
+      login('demo-session-token', { id: 'user-demo', name: userName, email: finalEmail });
+      window.location.href = '/dashboard';
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await handleLogin();
   };
 
   return (
@@ -64,7 +72,7 @@ export default function LoginPage() {
               <Input 
                 label="Email Address" 
                 type="email" 
-                placeholder="you@example.com"
+                placeholder="demo@automlops.ai"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 icon={<Mail className="w-5 h-5" />}
@@ -84,7 +92,7 @@ export default function LoginPage() {
                   <input type="checkbox" defaultChecked className="rounded bg-white/10 border-white/20 text-purple-500 focus:ring-purple-500/50" />
                   Remember me
                 </label>
-                <span className="text-xs text-gray-400">Default: any credentials</span>
+                <span className="text-xs text-cyan-400 font-medium">Demo mode enabled</span>
               </div>
               <Button type="submit" className="w-full" isLoading={loading}>
                 Sign In
