@@ -30,6 +30,13 @@ async def get_cost_carbon_estimate(
         ds = ds_res.scalars().first()
         if ds:
             dataset_name = ds.filename
+    else:
+        ds_res = await db.execute(
+            select(Dataset).filter(Dataset.project_id == project_id).order_by(Dataset.uploaded_at.desc())
+        )
+        ds = ds_res.scalars().first()
+        if ds:
+            dataset_name = ds.filename
 
     res = calculate_cloud_cost_and_carbon(
         daily_requests=100000,
@@ -57,6 +64,13 @@ async def calculate_custom_cost_carbon(
     dataset_name = None
     if request.dataset_id:
         ds_res = await db.execute(select(Dataset).filter(Dataset.id == request.dataset_id))
+        ds = ds_res.scalars().first()
+        if ds:
+            dataset_name = ds.filename
+    else:
+        ds_res = await db.execute(
+            select(Dataset).filter(Dataset.project_id == project_id).order_by(Dataset.uploaded_at.desc())
+        )
         ds = ds_res.scalars().first()
         if ds:
             dataset_name = ds.filename

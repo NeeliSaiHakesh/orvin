@@ -105,12 +105,14 @@ export default function CostCarbonPage() {
     lat = targetLatency,
     reg = region,
     hw = hardwareTier,
-    spot = spotEnabled
+    spot = spotEnabled,
+    dsId?: string
   ) => {
     try {
       setCalculating(true);
+      const targetDs = dsId !== undefined ? dsId : selectedDataset;
       const res = await api.costCarbon.calculate(projectId, {
-        dataset_id: selectedDataset || undefined,
+        dataset_id: targetDs || undefined,
         daily_requests: reqs,
         target_p95_latency_ms: lat,
         region: reg,
@@ -127,7 +129,7 @@ export default function CostCarbonPage() {
 
   const handleDatasetSelect = async (datasetId: string) => {
     setSelectedDataset(datasetId);
-    await reCalculate(dailyRequests, targetLatency, region, hardwareTier, spotEnabled);
+    await reCalculate(dailyRequests, targetLatency, region, hardwareTier, spotEnabled, datasetId);
   };
 
   const downloadTerraformBlueprint = () => {

@@ -242,7 +242,7 @@ Signed-Off By: AutoMLOps Automated Governance Engine
           </Button>
 
           <Button 
-            onClick={loadDatasetsAndScore} 
+            onClick={() => selectedDataset ? handleDatasetSelect(selectedDataset) : loadDatasetsAndScore()} 
             disabled={loading}
             className="flex items-center gap-1.5 text-xs"
           >
