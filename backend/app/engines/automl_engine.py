@@ -4,13 +4,14 @@ Trains multiple ML models with strict statistical data-quality standards:
 - Exact duplicate removal before splitting (preventing train/test leakage)
 - Stratified 80/20 train-test holdout split with verification of holdout sample size
 - 5-Fold Stratified Cross-Validation reporting mean accuracy ± standard deviation
-- Probability threshold calibration for boosting/classification algorithms
+- Out-of-fold probability threshold calibration on training set (zero test leakage)
+- Automatic identifier and index column removal (preventing memorization leakage)
 - Flagging and filtering of uncalibrated models (AUC vs Accuracy discrepancy > 20 points)
 - Full dataset audit statistics (total rows, duplicates removed, unique rows, train/test counts, class balance)
 """
 import pandas as pd  # type: ignore
 import numpy as np  # type: ignore
-from sklearn.model_selection import train_test_split, StratifiedKFold, KFold, cross_val_score  # type: ignore
+from sklearn.model_selection import train_test_split, StratifiedKFold, KFold, cross_val_score, cross_val_predict  # type: ignore
 from sklearn.preprocessing import LabelEncoder  # type: ignore
 from sklearn.linear_model import LogisticRegression, LinearRegression, Ridge  # type: ignore
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor, GradientBoostingClassifier, GradientBoostingRegressor  # type: ignore
@@ -129,11 +130,22 @@ def _get_regression_candidates() -> dict:
 
 
 def _preprocess_features(X: pd.DataFrame) -> pd.DataFrame:
-    """Ensure all feature columns are numeric, clean, and properly encoded."""
+    """Ensure all feature columns are numeric, clean, and remove identifier/leakage columns."""
     X_clean = X.copy()
     
     for col in list(X_clean.columns):
+        col_str = str(col).lower().strip()
+        # Drop ID, index, and identifier columns that leak ground truth or enable artificial memorization
+        if col_str in ['id', 'user_id', 'customer_id', 'customerid', 'client_id', 'row_id', 'index', 'unnamed: 0', 'unnamed: 0.1', 'uuid', 'guid', 'id_number']:
+            X_clean = X_clean.drop(columns=[col])
+            continue
+            
         series = X_clean[col]
+        # Drop constant columns
+        if series.nunique() <= 1:
+            X_clean = X_clean.drop(columns=[col])
+            continue
+            
         if pd.api.types.is_object_dtype(series) or pd.api.types.is_string_dtype(series) or isinstance(series.dtype, pd.CategoricalDtype):
             nunique = series.nunique()
             if nunique > 25 and (nunique / max(len(series), 1)) > 0.85:
@@ -160,12 +172,12 @@ def _preprocess_features(X: pd.DataFrame) -> pd.DataFrame:
 
 
 def _optimize_threshold(y_true: np.ndarray, y_proba_pos: np.ndarray) -> tuple[float, np.ndarray, float]:
-    """Find optimal decision threshold maximizing F1 score for calibrated predictions."""
+    """Find optimal decision threshold maximizing F1 score on training folds."""
     best_thresh = 0.5
     best_f1 = -1.0
     best_preds = (y_proba_pos >= 0.5).astype(int)
     
-    thresholds = np.linspace(0.05, 0.95, 37)
+    thresholds = np.linspace(0.10, 0.90, 33)
     for t in thresholds:
         preds = (y_proba_pos >= t).astype(int)
         score = f1_score(y_true, preds, zero_division=0)
@@ -193,12 +205,16 @@ def train_models(
     Returns:
         tuple (results: list[dict], dataset_stats: dict)
     """
-    # 1. Deduplication Audit & Check
+    # 1. Exact Deduplication Audit & Check (Prevent identical rows leaking across train/test)
     if raw_df is not None:
         total_rows = len(raw_df)
         duplicates_removed = int(raw_df.duplicated().sum())
         clean_df = raw_df.drop_duplicates().reset_index(drop=True)
         unique_rows = len(clean_df)
+        
+        target_name = y.name if (hasattr(y, 'name') and y.name and y.name in clean_df.columns) else clean_df.columns[-1]
+        X = clean_df.drop(columns=[target_name])
+        y = clean_df[target_name]
     else:
         full_df = pd.concat([X, y.rename('__target__')], axis=1)
         total_rows = len(full_df)
@@ -229,7 +245,7 @@ def train_models(
             "max": round(float(y.max()), 3)
         }
     
-    # 2. Stratified 80/20 Train-Test Split (Ensure at least sufficient holdout)
+    # 2. Stratified 80/20 Train-Test Split (Ensure clean out-of-sample holdout)
     can_stratify = (
         task_type == 'classification' and 
         len(y) >= 10 and 
@@ -294,7 +310,16 @@ def train_models(
                     cv_mean = 0.0
                     cv_std = 0.0
                 
-                # B. Fit on Train Set
+                # B. Threshold Tuning strictly on TRAIN fold out-of-fold probabilities (Zero test leakage)
+                optimal_threshold = 0.5
+                if task_type == 'classification' and hasattr(model_obj, 'predict_proba') and len(np.unique(y_train)) == 2:
+                    try:
+                        train_oof_proba = cross_val_predict(model_obj, X_train, y_train, cv=cv_splitter, method='predict_proba')[:, 1]
+                        optimal_threshold, _, _ = _optimize_threshold(y_train.values, train_oof_proba)
+                    except Exception:
+                        optimal_threshold = 0.5
+                
+                # C. Fit final candidate on Train Set
                 model_obj.fit(X_train, y_train)
                 fit_time = time.time() - t0
                 
@@ -307,26 +332,21 @@ def train_models(
                 }
                 
                 if task_type == 'classification':
-                    # Raw predictions
-                    raw_pred = model_obj.predict(X_test)
-                    
-                    # Compute ROC-AUC and Probability Threshold Calibration
-                    optimal_threshold = 0.5
-                    y_pred = raw_pred
+                    # Apply learned threshold to holdout Test Set
                     roc_auc = None
-                    
                     if hasattr(model_obj, 'predict_proba'):
                         try:
                             y_proba = model_obj.predict_proba(X_test)
-                            if len(np.unique(y)) == 2:
+                            if len(np.unique(y_test)) == 2:
                                 roc_auc = float(roc_auc_score(y_test, y_proba[:, 1]))
-                                # Optimize decision threshold to avoid 0.5 default miscalibration
-                                optimal_threshold, calib_pred, _ = _optimize_threshold(y_test.values, y_proba[:, 1])
-                                y_pred = calib_pred
+                                y_pred = (y_proba[:, 1] >= optimal_threshold).astype(int)
                             else:
                                 roc_auc = float(roc_auc_score(y_test, y_proba, multi_class='ovr', average='weighted'))
+                                y_pred = model_obj.predict(X_test)
                         except Exception:
-                            roc_auc = None
+                            y_pred = model_obj.predict(X_test)
+                    else:
+                        y_pred = model_obj.predict(X_test)
                     
                     acc = float(accuracy_score(y_test, y_pred))
                     f1 = float(f1_score(y_test, y_pred, average='weighted', zero_division=0))
