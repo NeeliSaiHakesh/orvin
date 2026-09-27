@@ -21,6 +21,9 @@ class CleaningConfig(BaseModel):
 class CleaningResponse(BaseModel):
     id: str
     dataset_id: str
+    new_dataset_id: Optional[str] = None
+    dataset_version: Optional[int] = None
+    message: Optional[str] = None
     steps_applied: List[Dict[str, Any]]
     rows_before: int
     rows_after: int

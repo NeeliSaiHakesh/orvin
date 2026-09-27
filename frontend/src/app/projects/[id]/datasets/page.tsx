@@ -9,12 +9,15 @@ import { FileUpload } from '@/components/ui/FileUpload';
 import { DataTable } from '@/components/ui/DataTable';
 import { Badge } from '@/components/ui/Badge';
 import { api } from '@/lib/api';
+import { ModuleVersionBadge } from '@/components/ui/ModuleVersionBadge';
 
 interface Dataset {
   id: string;
   filename: string;
   file_type: string;
   file_size: number;
+  file_hash?: string;
+  version?: number;
   row_count: number | null;
   column_count: number | null;
   status: string;
@@ -47,6 +50,7 @@ export default function DatasetsPage() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadNotice, setUploadNotice] = useState<{ message: string; isDuplicate: boolean } | null>(null);
 
   useEffect(() => {
     loadDatasets();
@@ -69,7 +73,15 @@ export default function DatasetsPage() {
     try {
       setUploading(true);
       setError(null);
-      await Promise.all(files.map(file => api.datasets.upload(projectId, file)));
+      setUploadNotice(null);
+      const results = await Promise.all(files.map(file => api.datasets.upload(projectId, file)));
+      const lastResult = results[results.length - 1];
+      if (lastResult && lastResult.message) {
+        setUploadNotice({
+          message: lastResult.message,
+          isDuplicate: !!lastResult.is_duplicate
+        });
+      }
       await loadDatasets();
     } catch (err: any) {
       setError(err.message);
@@ -108,13 +120,31 @@ export default function DatasetsPage() {
 
   const columns = [
     {
-      key: 'filename', header: 'File', sortable: true,
+      key: 'version', header: 'Ver', sortable: true,
+      render: (item: Dataset) => (
+        <span className="px-2 py-0.5 rounded-md bg-purple-500/20 border border-purple-500/30 text-purple-300 font-mono font-bold text-xs">
+          v{item.version || 1}
+        </span>
+      )
+    },
+    {
+      key: 'filename', header: 'File & Checksum', sortable: true,
       render: (item: Dataset) => (
         <div className="flex items-center gap-3">
           {getFileIcon(item.file_type)}
           <div>
-            <p className="font-medium">{item.filename}</p>
-            <p className="text-xs text-gray-500">{formatFileSize(item.file_size)}</p>
+            <p className="font-medium text-white">{item.filename}</p>
+            <div className="flex items-center gap-2 text-xs text-gray-400">
+              <span>{formatFileSize(item.file_size)}</span>
+              {item.file_hash && (
+                <>
+                  <span>•</span>
+                  <span className="font-mono text-[10px] text-cyan-400/80 bg-cyan-950/40 px-1.5 py-0.5 rounded border border-cyan-500/20" title={`SHA256: ${item.file_hash}`}>
+                    SHA: {item.file_hash.substring(0, 10)}…
+                  </span>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )
@@ -161,8 +191,48 @@ export default function DatasetsPage() {
         <p className="text-gray-400">Upload and manage your project datasets.</p>
       </div>
 
+      {datasets.length > 0 && (
+        <ModuleVersionBadge
+          moduleName="Datasets"
+          currentVersion={Math.max(...datasets.map(d => d.version || 1))}
+          availableVersions={datasets.map(d => ({
+            version: d.version || 1,
+            label: d.filename,
+            sublabel: `${d.row_count ? d.row_count.toLocaleString() : '0'} rows • ${d.column_count || 0} cols`,
+            timestamp: formatUploadDate(d.uploaded_at)
+          }))}
+          onSelectVersion={(v) => {
+            const target = datasets.find(d => d.version === v);
+            if (target) {
+              // Version selected
+            }
+          }}
+          projectId={projectId}
+          artifactType="Dataset"
+        />
+      )}
+
       {error && (
         <div className="glass border-red-500/30 bg-red-500/10 p-4 rounded-xl text-red-400">{error}</div>
+      )}
+
+      {uploadNotice && (
+        <div className={`glass p-4 rounded-xl border flex items-center justify-between gap-4 ${
+          uploadNotice.isDuplicate 
+            ? 'border-yellow-500/40 bg-yellow-500/10 text-yellow-300'
+            : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
+        }`}>
+          <div className="flex items-center gap-3">
+            <span className={`w-2.5 h-2.5 rounded-full ${uploadNotice.isDuplicate ? 'bg-yellow-400 animate-pulse' : 'bg-emerald-400'}`} />
+            <span className="text-sm font-medium">{uploadNotice.message}</span>
+          </div>
+          <button 
+            onClick={() => setUploadNotice(null)}
+            className="text-xs opacity-70 hover:opacity-100 uppercase tracking-wider font-bold"
+          >
+            Dismiss
+          </button>
+        </div>
       )}
 
       <Card glow>

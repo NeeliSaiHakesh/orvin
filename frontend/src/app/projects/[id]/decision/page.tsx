@@ -10,6 +10,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { DatasetSelector } from '@/components/ui/DatasetSelector';
+import { NoDatasetGate } from '@/components/ui/NoDatasetGate';
 import { api } from '@/lib/api';
 
 interface RecommendationItem {
@@ -57,6 +58,7 @@ export default function DecisionEnginePage() {
   const [generating, setGenerating] = useState(false);
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [appliedActions, setAppliedActions] = useState<Record<string, boolean>>({});
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -82,8 +84,13 @@ export default function DecisionEnginePage() {
       setError(err.message || 'Failed to load AI decision report');
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
   };
+
+  if (!initialLoading && datasets.length === 0) {
+    return <NoDatasetGate projectId={projectId} pageName="AI Decision Engine" pageDescription="Intelligent recommendations for data quality, feature engineering, model selection, and deployment." />;
+  }
 
   const handleDatasetSelect = async (datasetId: string) => {
     try {

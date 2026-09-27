@@ -7,6 +7,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { DatasetSelector } from '@/components/ui/DatasetSelector';
+import { NoDatasetGate } from '@/components/ui/NoDatasetGate';
 import { api } from '@/lib/api';
 
 interface AnalysisReport {
@@ -27,6 +28,7 @@ export default function AnalysisPage() {
   const [datasets, setDatasets] = useState<any[]>([]);
   const [selectedDataset, setSelectedDataset] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -41,8 +43,7 @@ export default function AnalysisPage() {
         const reportData = await api.analysis.getReport(datasetId);
         setReport(reportData);
       } catch {
-        const result = await api.analysis.analyze(datasetId);
-        setReport(result);
+        setReport(null);
       }
     } catch (err: any) {
       setError(err.message || 'Failed to load analysis for selected dataset');
@@ -70,8 +71,13 @@ export default function AnalysisPage() {
       setDatasets([]);
     } finally {
       setAnalyzing(false);
+      setInitialLoading(false);
     }
   };
+
+  if (!initialLoading && datasets.length === 0) {
+    return <NoDatasetGate projectId={projectId} pageName="Data Analysis" pageDescription="Automated dataset profiling, correlations, and distributions." />;
+  }
 
   const runAnalysis = async () => {
     if (!selectedDataset) return;
@@ -154,8 +160,15 @@ export default function AnalysisPage() {
         <Card>
           <CardBody className="text-center py-16">
             <BarChart3 className="w-16 h-16 mx-auto mb-4 text-gray-600" />
-            <p className="text-lg text-gray-400">No analysis report available</p>
-            <p className="text-sm text-gray-500 mt-1">Upload a dataset and click &quot;Run Analysis&quot; to generate insights</p>
+            <p className="text-lg text-white font-semibold">No Analysis Report Generated Yet</p>
+            <p className="text-sm text-gray-400 mt-1 max-w-md mx-auto">
+              Click &quot;Run Dataset Analysis&quot; to calculate summary statistics, data type distributions, missing value percentages, and cross-feature correlations.
+            </p>
+            <div className="mt-6">
+              <Button onClick={runAnalysis} disabled={analyzing || !selectedDataset} className="mx-auto flex items-center gap-2">
+                <Search className="w-4 h-4" /> Run Dataset Analysis
+              </Button>
+            </div>
           </CardBody>
         </Card>
       )}

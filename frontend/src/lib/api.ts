@@ -67,7 +67,8 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}): Promise<an
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({ detail: `HTTP ${response.status}` }));
-        throw new Error(error.detail || error.message || `API Error: ${response.status}`);
+        const message = error.detail || error.message || `API Error: ${response.status}`;
+        throw new Error(message);
       }
 
       const contentType = response.headers.get('content-type');
@@ -77,6 +78,11 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}): Promise<an
       return response;
     } catch (err: any) {
       lastError = err;
+      // If the server answered with an error response (or client aborted), fail immediately rather than probing sleeping cloud URLs
+      const isNetworkDown = !err.message || err.message.includes('Failed to fetch') || err.message.includes('NetworkError') || err.message.includes('ECONNREFUSED');
+      if (!isNetworkDown) {
+        throw err;
+      }
       continue;
     }
   }
@@ -221,6 +227,12 @@ export const api = {
     getModel: (modelId: string) =>
       fetchAPI(`/models/${modelId}`),
 
+    getPipelineRecipe: (modelId: string) =>
+      fetchAPI(`/models/${modelId}/pipeline`),
+
+    getPipelineRecipeByVersion: (projectId: string, version: number) =>
+      fetchAPI(`/projects/${projectId}/pipeline/v${version}`),
+
     selectModel: (modelId: string) =>
       fetchAPI(`/models/${modelId}/select`, { method: 'POST' }),
   },
@@ -322,5 +334,40 @@ export const api = {
       const q = datasetId ? `?dataset_id=${encodeURIComponent(datasetId)}` : '';
       return fetchAPI(`/projects/${projectId}/readiness/score${q}`);
     },
+  },
+
+  // ── Experiment Tracking (MLflow-style) ──
+  experiments: {
+    list: (projectId: string, params?: { algorithm?: string; model_version?: number }) => {
+      const sp = new URLSearchParams();
+      if (params?.algorithm) sp.append('algorithm', params.algorithm);
+      if (params?.model_version) sp.append('model_version', String(params.model_version));
+      const q = sp.toString() ? `?${sp.toString()}` : '';
+      return fetchAPI(`/projects/${projectId}/experiments${q}`);
+    },
+
+    get: (runId: string) =>
+      fetchAPI(`/experiments/${runId}`),
+
+    compare: (projectId: string, runIds: string[]) =>
+      fetchAPI(`/projects/${projectId}/experiments/compare`, {
+        method: 'POST',
+        body: JSON.stringify({ run_ids: runIds }),
+      }),
+
+    delete: (runId: string) =>
+      fetchAPI(`/experiments/${runId}`, { method: 'DELETE' }),
+  },
+
+  // ── Centralized Version Lineage & Rollback ──
+  versionLineage: {
+    getHistory: (projectId: string) =>
+      fetchAPI(`/projects/${projectId}/version-history`),
+
+    rollback: (projectId: string, targetVersion: number, modelId?: string) =>
+      fetchAPI(`/projects/${projectId}/rollback`, {
+        method: 'POST',
+        body: JSON.stringify({ target_version: targetVersion, model_id: modelId }),
+      }),
   },
 };

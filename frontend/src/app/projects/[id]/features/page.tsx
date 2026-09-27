@@ -1,11 +1,13 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { Plot } from '@/components/ui/Plot';
-import { Wand2, Loader2, BarChart3, CheckCircle2 } from 'lucide-react';
+import { Wand2, Loader2, BarChart3, CheckCircle2, ArrowRight, Dna } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { DatasetSelector } from '@/components/ui/DatasetSelector';
+import { NoDatasetGate } from '@/components/ui/NoDatasetGate';
 import { api } from '@/lib/api';
 
 export default function FeaturesPage() {
@@ -17,6 +19,8 @@ export default function FeaturesPage() {
   const [loading, setLoading] = useState(false);
   const [engineering, setEngineering] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [successNotice, setSuccessNotice] = useState<string | null>(null);
 
   useEffect(() => {
     loadDatasets();
@@ -24,6 +28,7 @@ export default function FeaturesPage() {
 
   const handleDatasetSelect = (datasetId: string) => {
     setSelectedDataset(datasetId);
+    setSuccessNotice(null);
     fetchFeatures(datasetId);
   };
 
@@ -38,35 +43,27 @@ export default function FeaturesPage() {
       }
     } catch {
       setDatasets([]);
+    } finally {
+      setInitialLoading(false);
     }
   };
+
+  if (!initialLoading && datasets.length === 0) {
+    return <NoDatasetGate projectId={projectId} pageName="Feature Engineering" pageDescription="Automated feature encoding, scaling, transformations, and importance ranking." />;
+  }
 
   const fetchFeatures = async (datasetId: string) => {
     try {
       setLoading(true);
       setError(null);
       const info = await api.features.get(datasetId);
-      if (info && (info.transformations || info.feature_importance)) {
+      if (info && (info.transformations?.length > 0 || (info.feature_importance && Object.keys(info.feature_importance).length > 0))) {
         setFeatureInfo(info);
       } else {
-        const result = await api.features.engineer(datasetId);
-        setFeatureInfo(result);
+        setFeatureInfo(null);
       }
     } catch {
-      setFeatureInfo({
-        transformations: [
-          { type: 'one_hot_encoding', column: 'Contract', explanation: 'One-hot encoded "Contract" (3 categories) to prevent order assumption.' },
-          { type: 'standard_scaling', columns_count: 5, explanation: 'Standardized numeric columns to mean 0, variance 1.' },
-          { type: 'datetime_extraction', column: 'SignupDate', explanation: 'Extracted year, month, day, dayofweek from "SignupDate".' },
-        ],
-        feature_importance: {
-          'tenure': 0.32,
-          'MonthlyCharges': 0.25,
-          'Contract_Two_year': 0.18,
-          'TotalCharges': 0.14,
-          'InternetService_Fiber': 0.11,
-        }
-      });
+      setFeatureInfo(null);
     } finally {
       setLoading(false);
     }
@@ -77,8 +74,20 @@ export default function FeaturesPage() {
     try {
       setEngineering(true);
       setError(null);
+      setSuccessNotice(null);
       const result = await api.features.engineer(selectedDataset);
       setFeatureInfo(result);
+      setSuccessNotice(result?.message || `Feature engineered snapshot v${result?.dataset_version || 3} generated successfully.`);
+      
+      // Reload datasets and auto-select the newly generated version
+      const freshDatasets = await api.datasets.list(projectId);
+      const list = Array.isArray(freshDatasets) ? freshDatasets : [];
+      setDatasets(list);
+      if (result?.new_dataset_id) {
+        setSelectedDataset(result.new_dataset_id);
+      } else if (list.length > 0) {
+        setSelectedDataset(list[0].id);
+      }
     } catch (err: any) {
       setError(err.message || 'Feature engineering failed');
     } finally {
@@ -138,11 +147,49 @@ export default function FeaturesPage() {
         <div className="glass border-red-500/30 bg-red-500/10 p-4 rounded-xl text-red-400">{error}</div>
       )}
 
+      {successNotice && (
+        <div className="glass border-cyan-500/30 bg-cyan-500/10 p-4 rounded-xl text-cyan-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-center gap-2">
+            <span className="font-bold">✓ Success:</span>
+            <span>{successNotice}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link 
+              href={`/projects/${projectId}/training`}
+              className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-200 text-xs font-semibold flex items-center gap-1 transition-colors"
+            >
+              <span>Next: AutoML Training</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+            <Button size="sm" variant="secondary" onClick={() => setSuccessNotice(null)}>Dismiss</Button>
+          </div>
+        </div>
+      )}
+
       {loading ? (
         <Card>
           <CardBody className="text-center py-16">
             <Loader2 className="w-12 h-12 mx-auto mb-4 text-purple-400 animate-spin" />
-            <p className="text-gray-400">Analyzing features and computing importance scores...</p>
+            <p className="text-gray-400">Loading feature analysis...</p>
+          </CardBody>
+        </Card>
+      ) : !featureInfo ? (
+        <Card>
+          <CardBody className="text-center py-16">
+            <Dna className="w-16 h-16 mx-auto mb-4 text-gray-600" />
+            <p className="text-lg text-white font-semibold">No Features Engineered Yet</p>
+            <p className="text-sm text-gray-400 mt-1 max-w-md mx-auto">
+              Click &quot;Run Feature Engineering&quot; above to automatically detect column types, apply one-hot/label encoding, standardize numeric features, and calculate feature importance scores.
+            </p>
+            <div className="mt-6">
+              <Button onClick={runEngineering} disabled={engineering || !selectedDataset} className="flex items-center gap-2 mx-auto">
+                {engineering ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Engineering Features...</>
+                ) : (
+                  <><Wand2 className="w-4 h-4" /> Run Feature Engineering</>
+                )}
+              </Button>
+            </div>
           </CardBody>
         </Card>
       ) : (

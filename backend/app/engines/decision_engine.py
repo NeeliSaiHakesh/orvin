@@ -1,6 +1,6 @@
 import pandas as pd  # type: ignore
 import numpy as np  # type: ignore
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 import uuid
 
@@ -25,7 +25,7 @@ def generate_decision_report(df: pd.DataFrame, dataset_name: str, task_type: str
     missing_counts = df.isnull().sum()
     total_missing = int(missing_counts.sum())
     missing_cols = missing_counts[missing_counts > 0].to_dict()
-    missing_ratio = float(total_missing / (row_count * col_count)) if row_count * col_count > 0 else 0.0
+    missing_ratio = total_missing / (row_count * col_count) if row_count * col_count > 0 else 0.0
 
     # 2. Outlier Analysis
     outlier_cols = []
@@ -215,7 +215,7 @@ def generate_decision_report(df: pd.DataFrame, dataset_name: str, task_type: str
 
     # ==================== C. DEPLOYMENT INFRASTRUCTURE & SIZING ====================
     # Sizing heuristics based on feature dimensions
-    est_memory_mb = max(256, int((col_count * 2) + 128))
+    est_memory_mb = max(256, (col_count * 2) + 128)
     rec_cpu = "1 vCPU" if col_count < 30 else "2 vCPUs"
     rec_ram = "512MB RAM" if est_memory_mb < 512 else "1GB RAM"
 
@@ -338,5 +338,5 @@ def generate_decision_report(df: pd.DataFrame, dataset_name: str, task_type: str
         },
         "categories": category_summaries,
         "recommendations": recommendations,
-        "generated_at": datetime.utcnow().isoformat() + "Z"
+        "generated_at": datetime.now(timezone.utc).isoformat()
     }

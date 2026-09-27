@@ -42,6 +42,9 @@ async def run_analysis(dataset_id: str, db: AsyncSession = Depends(get_db), curr
         )
         db.add(db_report)
         
+    if dataset.status in ['uploaded', None]:
+        dataset.status = 'analyzed'
+
     await db.commit()
     await db.refresh(db_report)
     return db_report

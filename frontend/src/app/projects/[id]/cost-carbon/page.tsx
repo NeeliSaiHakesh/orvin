@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { DatasetSelector } from '@/components/ui/DatasetSelector';
 import { Plot } from '@/components/ui/Plot';
+import { NoDatasetGate } from '@/components/ui/NoDatasetGate';
 import { api } from '@/lib/api';
 
 interface CloudProviderEstimate {
@@ -77,6 +78,7 @@ export default function CostCarbonPage() {
   const [data, setData] = useState<CostCarbonData | null>(null);
   const [loading, setLoading] = useState(true);
   const [calculating, setCalculating] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -104,8 +106,13 @@ export default function CostCarbonPage() {
       setError(err.message || 'Failed to load cost and carbon estimate');
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
   };
+
+  if (!initialLoading && datasets.length === 0) {
+    return <NoDatasetGate projectId={projectId} pageName="Cost & Carbon Estimator" pageDescription="Cloud deployment cost analysis, carbon footprint tracking, and green optimization." />;
+  }
 
   const reCalculate = async (
     reqs = dailyRequests,

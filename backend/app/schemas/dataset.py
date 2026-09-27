@@ -11,11 +11,15 @@ class DatasetResponse(BaseModel):
     filename: str
     file_type: str
     file_size: int
+    file_hash: Optional[str] = None
+    version: int = 1
     row_count: Optional[int] = None
     column_count: Optional[int] = None
     columns_info: Optional[Dict[str, Any]] = None
     status: str
     uploaded_at: datetime
+    is_duplicate: Optional[bool] = False
+    message: Optional[str] = None
 
     class Config:
         from_attributes = True

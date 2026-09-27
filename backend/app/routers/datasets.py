@@ -1,76 +1,156 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+import hashlib
+import uuid
+import os
+import shutil
+import pandas as pd
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import func as sql_func
 from app.database import get_db
 from app.core.dependencies import get_current_user
 from app.models.user import User
 from app.models.dataset import Dataset
 from app.schemas.dataset import DatasetResponse, DatasetPreview
-import os
-import shutil
-import pandas as pd
 from app.config import settings
 
 router = APIRouter(tags=["datasets"])
 
 @router.post("/projects/{project_id}/datasets", response_model=DatasetResponse)
-async def upload_dataset(project_id: str, file: UploadFile = File(...), db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def upload_dataset(
+    project_id: str,
+    file: UploadFile = File(...),
+    force_reupload: bool = Query(False, description="Force re-upload even if identical file hash exists"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
     clean_filename = os.path.basename(file.filename or "dataset.csv")
-    file_path = os.path.join(settings.UPLOAD_DIR, clean_filename)
+    temp_filename = f"temp_{uuid.uuid4().hex}_{clean_filename}"
+    temp_path = os.path.join(settings.UPLOAD_DIR, temp_filename)
     
-    with open(file_path, "wb") as buffer:
-        while chunk := await file.read(1024 * 1024):  # 1MB chunks
-            buffer.write(chunk)
-        
-    file_size = os.path.getsize(file_path)
-    file_type = clean_filename.split('.')[-1].lower()
-    
-    # Fast row/column detection
+    # 1. Stream file and compute SHA256 checksum
     try:
+        sha256_hasher = hashlib.sha256()
+        with open(temp_path, "wb") as buffer:
+            while chunk := await file.read(1024 * 1024):  # 1MB chunks
+                sha256_hasher.update(chunk)
+                buffer.write(chunk)
+                
+        file_hash = sha256_hasher.hexdigest()
+        file_size = os.path.getsize(temp_path)
+        file_type = clean_filename.split('.')[-1].lower()
+
+        # 2. Check for duplicate dataset in this project
+        existing_res = await db.execute(
+            select(Dataset)
+            .filter(Dataset.project_id == project_id, Dataset.file_hash == file_hash)
+            .order_by(Dataset.uploaded_at.desc())
+        )
+        existing_dataset = existing_res.scalars().first()
+
+        if existing_dataset and not force_reupload:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+            
+            resp = DatasetResponse(
+                id=existing_dataset.id,
+                project_id=existing_dataset.project_id,
+                filename=existing_dataset.filename,
+                file_type=existing_dataset.file_type,
+                file_size=existing_dataset.file_size,
+                file_hash=existing_dataset.file_hash,
+                version=existing_dataset.version,
+                row_count=existing_dataset.row_count,
+                column_count=existing_dataset.column_count,
+                columns_info=existing_dataset.columns_info,
+                status=existing_dataset.status,
+                uploaded_at=existing_dataset.uploaded_at,
+                is_duplicate=True,
+                message=f"Identical dataset already uploaded as v{existing_dataset.version} ({existing_dataset.filename}). Re-upload skipped."
+            )
+            return resp
+
+        # 3. Determine next version number for this project
+        version_res = await db.execute(
+            select(sql_func.max(Dataset.version)).filter(Dataset.project_id == project_id)
+        )
+        max_version = version_res.scalar() or 0
+        next_version = max_version + 1
+
+        # 4. Save file permanently with version prefix
+        final_filename = f"{project_id[:8]}_v{next_version}_{clean_filename}"
+        final_file_path = os.path.join(settings.UPLOAD_DIR, final_filename)
+        shutil.move(temp_path, final_file_path)
+        
+        # Fast row/column detection
+        row_count = 0
+        col_count = 0
+        cols_info = {}
+
         if file_type == 'csv':
-            df_sample = pd.read_csv(file_path, nrows=100)
-            # Count total rows efficiently
-            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                row_count = max(0, sum(1 for _ in f) - 1)
-            cols_info = {col: str(df_sample[col].dtype) for col in df_sample.columns}
+            df_sample = pd.read_csv(final_file_path, nrows=50)
             col_count = len(df_sample.columns)
+            cols_info = {str(col): str(df_sample[col].dtype) for col in df_sample.columns}
+            with open(final_file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                row_count = max(0, sum(1 for _ in f) - 1)
         elif file_type in ['xlsx', 'xls']:
-            df = pd.read_excel(file_path)
+            df = pd.read_excel(final_file_path)
             file_type = 'excel'
             row_count = len(df)
             col_count = len(df.columns)
-            cols_info = {col: str(df[col].dtype) for col in df.columns}
+            cols_info = {str(col): str(df[col].dtype) for col in df.columns}
         elif file_type == 'json':
-            df = pd.read_json(file_path)
+            df = pd.read_json(final_file_path)
             row_count = len(df)
             col_count = len(df.columns)
-            cols_info = {col: str(df[col].dtype) for col in df.columns}
+            cols_info = {str(col): str(df[col].dtype) for col in df.columns}
         else:
-            raise HTTPException(status_code=400, detail="Unsupported file format")
+            raise HTTPException(status_code=400, detail="Unsupported file format. Please upload CSV, Excel, or JSON.")
+            
+        db_dataset = Dataset(
+            project_id=project_id,
+            filename=file.filename or clean_filename,
+            file_path=final_file_path,
+            file_type=file_type,
+            file_size=file_size,
+            file_hash=file_hash,
+            version=next_version,
+            row_count=row_count,
+            column_count=col_count,
+            columns_info=cols_info,
+            status="uploaded"
+        )
+        db.add(db_dataset)
+        await db.commit()
+        await db.refresh(db_dataset)
+
+        resp = DatasetResponse(
+            id=db_dataset.id,
+            project_id=db_dataset.project_id,
+            filename=db_dataset.filename,
+            file_type=db_dataset.file_type,
+            file_size=db_dataset.file_size,
+            file_hash=db_dataset.file_hash,
+            version=db_dataset.version,
+            row_count=db_dataset.row_count,
+            column_count=db_dataset.column_count,
+            columns_info=db_dataset.columns_info,
+            status=db_dataset.status,
+            uploaded_at=db_dataset.uploaded_at,
+            is_duplicate=False,
+            message=f"Dataset v{next_version} ({clean_filename}) uploaded successfully."
+        )
+        return resp
+    except HTTPException:
+        raise
     except Exception as e:
-        if isinstance(e, HTTPException):
-            raise e
-        # Fallback to standard reading
-        df = pd.read_csv(file_path) if file_type == 'csv' else pd.read_excel(file_path)
-        row_count = len(df)
-        col_count = len(df.columns)
-        cols_info = {col: str(df[col].dtype) for col in df.columns}
-        
-    db_dataset = Dataset(
-        project_id=project_id,
-        filename=file.filename,
-        file_path=file_path,
-        file_type=file_type,
-        file_size=file_size,
-        row_count=row_count,
-        column_count=col_count,
-        columns_info=cols_info
-    )
-    db.add(db_dataset)
-    await db.commit()
-    await db.refresh(db_dataset)
-    return db_dataset
+        if os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except Exception:
+                pass
+        raise HTTPException(status_code=500, detail=f"Failed to process uploaded file: {str(e)}")
 
 @router.get("/projects/{project_id}/datasets", response_model=list[DatasetResponse])
 async def list_datasets(project_id: str, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):

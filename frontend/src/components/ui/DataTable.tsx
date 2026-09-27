@@ -43,7 +43,7 @@ export function DataTable<T>({ columns, data, itemsPerPage = 10 }: DataTableProp
 
   return (
     <div className="w-full">
-      <div className="overflow-x-auto rounded-t-xl border border-white/10 bg-black/20 backdrop-blur-md">
+      <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-white/5 border-b border-white/10 text-gray-300 text-sm">
@@ -85,7 +85,7 @@ export function DataTable<T>({ columns, data, itemsPerPage = 10 }: DataTableProp
       </div>
       
       {totalPages > 1 && (
-        <div className="flex items-center justify-between p-4 border border-t-0 border-white/10 rounded-b-xl bg-black/40 backdrop-blur-md">
+        <div className="flex items-center justify-between p-4 border-t border-white/10">
           <span className="text-sm text-gray-400">
             Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, data.length)} of {data.length} results
           </span>

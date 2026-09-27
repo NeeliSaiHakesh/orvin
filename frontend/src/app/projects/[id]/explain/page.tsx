@@ -5,6 +5,7 @@ import { Plot } from '@/components/ui/Plot';
 import { BrainCircuit, BarChart3, Loader2 } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { NoDatasetGate } from '@/components/ui/NoDatasetGate';
 import { api } from '@/lib/api';
 
 export default function ExplainPage() {
@@ -14,11 +15,26 @@ export default function ExplainPage() {
   const [models, setModels] = useState<any[]>([]);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadModels();
   }, [projectId]);
+
+  const fetchExplanation = async (modelId: string) => {
+    if (!modelId) return;
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await api.explain.getReport(modelId);
+      setExplanation(data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch explanation');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadModels = async () => {
     try {
@@ -28,23 +44,22 @@ export default function ExplainPage() {
       if (list.length > 0) {
         const selected = list.find((m: any) => m.is_selected) || list[0];
         setSelectedModel(selected.id);
+        fetchExplanation(selected.id);
       }
     } catch {
       setModels([]);
+    } finally {
+      setInitialLoading(false);
     }
   };
 
-  const loadExplanation = async () => {
-    if (!selectedModel) return;
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await api.explain.getReport(selectedModel);
-      setExplanation(data);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+  if (!initialLoading && models.length === 0) {
+    return <NoDatasetGate projectId={projectId} pageName="Explainable AI & SHAP" pageDescription="Understand feature contributions, decision boundaries, and model fairness." requiresModel />;
+  }
+
+  const loadExplanation = () => {
+    if (selectedModel) {
+      fetchExplanation(selectedModel);
     }
   };
 
@@ -78,7 +93,10 @@ export default function ExplainPage() {
             <div className="relative">
               <select
                 value={selectedModel || ''}
-                onChange={(e) => setSelectedModel(e.target.value)}
+                onChange={(e) => {
+                  setSelectedModel(e.target.value);
+                  fetchExplanation(e.target.value);
+                }}
                 className="bg-[#0f172a] text-gray-100 border border-purple-500/40 rounded-xl px-4 py-2.5 text-sm font-medium shadow-xl hover:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 appearance-none pr-10 cursor-pointer min-w-[280px]"
               >
                 {models.map((m: any, idx: number) => (

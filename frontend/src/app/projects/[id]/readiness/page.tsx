@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { DatasetSelector } from '@/components/ui/DatasetSelector';
 import { Plot } from '@/components/ui/Plot';
+import { NoDatasetGate } from '@/components/ui/NoDatasetGate';
 import { api } from '@/lib/api';
 
 interface MetricDetail {
@@ -71,6 +72,7 @@ export default function ReadinessPage() {
   const [error, setError] = useState<string | null>(null);
   const [expandedPillar, setExpandedPillar] = useState<string | null>(null);
   const [completedRemediations, setCompletedRemediations] = useState<Record<string, boolean>>({});
+  const [initialLoading, setInitialLoading] = useState(true);
 
   useEffect(() => {
     loadDatasetsAndScore();
@@ -95,8 +97,13 @@ export default function ReadinessPage() {
       setError(err.message || 'Failed to load readiness scorecard');
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
   };
+
+  if (!initialLoading && datasets.length === 0) {
+    return <NoDatasetGate projectId={projectId} pageName="Production Readiness" pageDescription="Comprehensive multi-pillar scorecard for deployment readiness assessment." />;
+  }
 
   const handleDatasetSelect = async (datasetId: string) => {
     try {

@@ -4,6 +4,8 @@ import { useParams } from 'next/navigation';
 import { Download, Copy, Code2, Sparkles, Check, Loader2, Container } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { ModuleVersionBadge } from '@/components/ui/ModuleVersionBadge';
+import { NoDatasetGate } from '@/components/ui/NoDatasetGate';
 import { api } from '@/lib/api';
 
 export default function ApiGenPage() {
@@ -16,6 +18,7 @@ export default function ApiGenPage() {
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -37,8 +40,13 @@ export default function ApiGenPage() {
       setModels([]);
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
   };
+
+  if (!initialLoading && models.length === 0) {
+    return <NoDatasetGate projectId={projectId} pageName="API Generator" pageDescription="Export trained models as production-ready REST API microservices with Docker bundles." requiresModel />;
+  }
 
   const fetchGeneratedCode = async (modelId: string) => {
     try {
@@ -101,22 +109,6 @@ export default function ApiGenPage() {
           <p className="text-gray-400">Instantly turn your trained model into a production-ready FastAPI service and Docker container.</p>
         </div>
         <div className="flex items-center gap-3">
-          {models.length > 0 && (
-            <select
-              value={selectedModel || ''}
-              onChange={(e) => {
-                setSelectedModel(e.target.value);
-                fetchGeneratedCode(e.target.value);
-              }}
-              className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:ring-2 focus:ring-purple-500"
-            >
-              {models.map((m: any) => (
-                <option key={m.id} value={m.id} className="bg-gray-900">
-                  {m.algorithm} {m.is_selected ? '(Selected Best)' : ''}
-                </option>
-              ))}
-            </select>
-          )}
           <Button onClick={generateApi} disabled={generating || !selectedModel} variant="secondary">
             {generating ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating...</> : <><Sparkles className="w-4 h-4" /> Re-Generate API</>}
           </Button>
@@ -125,6 +117,29 @@ export default function ApiGenPage() {
           </Button>
         </div>
       </div>
+
+      {models.length > 0 && (
+        <ModuleVersionBadge
+          moduleName="API Endpoint"
+          currentVersion={models.find(m => m.id === selectedModel)?.version || 1}
+          availableVersions={models.map(m => ({
+            version: m.version || 1,
+            label: `FastAPI for ${m.algorithm}`,
+            sublabel: m.is_selected ? 'Active Production Model' : 'Candidate Model',
+            timestamp: m.trained_at ? new Date(m.trained_at).toLocaleDateString() : undefined,
+            isActive: m.is_selected
+          }))}
+          onSelectVersion={(v) => {
+            const target = models.find(m => (m.version || 1) === v);
+            if (target) {
+              setSelectedModel(target.id);
+              fetchGeneratedCode(target.id);
+            }
+          }}
+          projectId={projectId}
+          artifactType="API"
+        />
+      )}
 
       {error && (
         <div className="glass border-red-500/30 bg-red-500/10 p-4 rounded-xl text-red-400">{error}</div>

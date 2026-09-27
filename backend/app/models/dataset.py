@@ -14,6 +14,8 @@ class Dataset(Base):
     file_path = Column(String, nullable=False)
     file_type = Column(String, nullable=False)
     file_size = Column(Integer, nullable=False)
+    file_hash = Column(String, nullable=True, index=True)
+    version = Column(Integer, default=1, nullable=False)
     row_count = Column(Integer, nullable=True)
     column_count = Column(Integer, nullable=True)
     columns_info = Column(JSON, nullable=True)

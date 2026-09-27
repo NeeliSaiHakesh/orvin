@@ -21,3 +21,5 @@ httpx
 joblib
 aiosqlite
 google-genai
+openpyxl
+xlrd

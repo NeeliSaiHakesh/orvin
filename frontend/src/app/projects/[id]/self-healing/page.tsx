@@ -9,6 +9,7 @@ import {
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { NoDatasetGate } from '@/components/ui/NoDatasetGate';
 import { api } from '@/lib/api';
 
 interface SubsystemHealth {
@@ -68,6 +69,8 @@ export default function SelfHealingPage() {
   const [selectedSeverity, setSelectedSeverity] = useState<string>('all');
   const [error, setError] = useState<string | null>(null);
   const [activeSimulationToast, setActiveSimulationToast] = useState<string | null>(null);
+  const [hasDatasets, setHasDatasets] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   useEffect(() => {
     loadStatus();
@@ -77,14 +80,25 @@ export default function SelfHealingPage() {
     try {
       setLoading(true);
       setError(null);
-      const data = await api.selfHealing.getStatus(projectId);
-      setStatus(data);
+      // Check datasets first
+      const dsData = await api.datasets.list(projectId);
+      const dsList = Array.isArray(dsData) ? dsData : [];
+      setHasDatasets(dsList.length > 0);
+      if (dsList.length > 0) {
+        const data = await api.selfHealing.getStatus(projectId);
+        setStatus(data);
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to load self-healing status');
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
   };
+
+  if (!initialLoading && !hasDatasets) {
+    return <NoDatasetGate projectId={projectId} pageName="Self-Healing & Resilience" pageDescription="Autonomous failure detection, circuit breakers, and automated recovery." />;
+  }
 
   const handleSimulateFailure = async (failureType: string, label: string) => {
     try {

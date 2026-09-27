@@ -1,11 +1,12 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { Check, X, ArrowRight, Sparkles, Loader2, Wand2 } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import { DatasetSelector } from '@/components/ui/DatasetSelector';
+import { NoDatasetGate } from '@/components/ui/NoDatasetGate';
 import { api } from '@/lib/api';
 
 interface CleaningSuggestion {
@@ -26,6 +27,7 @@ export default function CleaningPage() {
   const [loading, setLoading] = useState(false);
   const [applying, setApplying] = useState(false);
   const [applied, setApplied] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -60,14 +62,17 @@ export default function CleaningPage() {
       if (list.length > 0) {
         setSelectedDataset(list[0].id);
         fetchSuggestions(list[0].id);
-      } else {
-        showFallbackSuggestions();
       }
     } catch {
       setDatasets([]);
-      showFallbackSuggestions();
+    } finally {
+      setInitialLoading(false);
     }
   };
+
+  if (!initialLoading && datasets.length === 0) {
+    return <NoDatasetGate projectId={projectId} pageName="AI Data Cleaning" pageDescription="Review, customize, and apply AI-suggested cleaning steps per dataset." />;
+  }
 
   const fetchSuggestions = async (datasetId: string) => {
     try {
@@ -99,6 +104,8 @@ export default function CleaningPage() {
     }));
   };
 
+  const [newVersionNotice, setNewVersionNotice] = useState<string | null>(null);
+
   const applyCleaning = async () => {
     if (!selectedDataset) {
       setApplied(true);
@@ -107,6 +114,7 @@ export default function CleaningPage() {
     try {
       setApplying(true);
       setError(null);
+      setNewVersionNotice(null);
       
       const config = {
         fill_missing: approvedSteps['Fill Missing Values'] ?? true,
@@ -117,8 +125,19 @@ export default function CleaningPage() {
         remove_correlated: approvedSteps['Remove Highly Correlated Features'] ?? false,
       };
 
-      await api.cleaning.apply(selectedDataset, config);
+      const res = await api.cleaning.apply(selectedDataset, config);
       setApplied(true);
+      setNewVersionNotice(res.message || `Cleaned dataset snapshot v${res.dataset_version || 2} generated successfully.`);
+      
+      // Reload datasets and auto-select the newly generated version
+      const freshDatasets = await api.datasets.list(projectId);
+      const list = Array.isArray(freshDatasets) ? freshDatasets : [];
+      setDatasets(list);
+      if (res.new_dataset_id) {
+        setSelectedDataset(res.new_dataset_id);
+      } else if (list.length > 0) {
+        setSelectedDataset(list[0].id);
+      }
     } catch (err: any) {
       setError(err.message || 'Cleaning failed');
     } finally {
@@ -155,9 +174,21 @@ export default function CleaningPage() {
       )}
 
       {applied && (
-        <div className="glass border-green-500/30 bg-green-500/10 p-4 rounded-xl text-green-400 flex items-center justify-between">
-          <span>✓ Dataset cleaned successfully! Ready for feature engineering and training.</span>
-          <Button size="sm" variant="secondary" onClick={() => setApplied(false)}>Dismiss</Button>
+        <div className="glass border-green-500/30 bg-green-500/10 p-4 rounded-xl text-green-400 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-center gap-2">
+            <span className="font-bold">✓ Success:</span>
+            <span>{newVersionNotice || "Cleaned dataset snapshot generated! Original raw dataset v1 preserved."}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link 
+              href={`/projects/${projectId}/features`}
+              className="px-3 py-1.5 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-300 text-xs font-semibold flex items-center gap-1 transition-colors"
+            >
+              <span>Next: Feature Engineering</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+            <Button size="sm" variant="secondary" onClick={() => setApplied(false)}>Dismiss</Button>
+          </div>
         </div>
       )}
 

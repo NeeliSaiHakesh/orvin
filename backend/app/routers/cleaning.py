@@ -45,6 +45,10 @@ async def get_cleaning_suggestions(dataset_id: str, db: AsyncSession = Depends(g
 
 @router.post("/datasets/{dataset_id}/clean/apply", response_model=CleaningResponse)
 async def apply_cleaning(dataset_id: str, config: CleaningConfig, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    import hashlib
+    from sqlalchemy import func as sql_func
+    from app.config import settings
+
     ds_res = await db.execute(select(Dataset).filter(Dataset.id == dataset_id))
     dataset = ds_res.scalars().first()
     if not dataset:
@@ -59,18 +63,59 @@ async def apply_cleaning(dataset_id: str, config: CleaningConfig, db: AsyncSessi
     rows_after = len(cleaned_df)
     cols_after = len(cleaned_df.columns)
     
-    cleaned_path = dataset.file_path.replace(f".{dataset.file_type}", f"_cleaned.{dataset.file_type}")
-    if dataset.file_type == 'csv':
+    # 1. Determine next version number for this project
+    version_res = await db.execute(
+        select(sql_func.max(Dataset.version)).filter(Dataset.project_id == dataset.project_id)
+    )
+    max_version = version_res.scalar() or 0
+    next_version = int(max_version) + 1
+
+    # 2. Construct clean filename
+    file_ext = os.path.splitext(dataset.filename)[1].lower() or ('.csv' if dataset.file_type == 'csv' else '.xlsx')
+    name_without_ext = os.path.splitext(dataset.filename)[0]
+    if not name_without_ext.endswith("_cleaned"):
+        clean_filename = f"{name_without_ext}_cleaned{file_ext}"
+    else:
+        clean_filename = f"{name_without_ext}{file_ext}"
+
+    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+    final_disk_filename = f"{dataset.project_id[:8]}_v{next_version}_{clean_filename}"
+    cleaned_path = os.path.join(settings.UPLOAD_DIR, final_disk_filename)
+
+    if dataset.file_type == 'csv' or file_ext == '.csv':
         cleaned_df.to_csv(cleaned_path, index=False)
     else:
-        cleaned_df.to_excel(cleaned_path, index=False)
-        
-    dataset.file_path = cleaned_path
-    dataset.row_count = rows_after
-    dataset.column_count = cols_after
-    
+        cleaned_df.to_excel(cleaned_path, index=False, engine='openpyxl')
+
+    # 3. Calculate checksum & size
+    sha256_hasher = hashlib.sha256()
+    with open(cleaned_path, "rb") as f:
+        while chunk := f.read(1024 * 1024):
+            sha256_hasher.update(chunk)
+    cleaned_hash = sha256_hasher.hexdigest()
+    file_size = os.path.getsize(cleaned_path)
+    cols_info = {col: str(cleaned_df[col].dtype) for col in cleaned_df.columns}
+
+    # 4. Create new Versioned Dataset record
+    cleaned_dataset = Dataset(
+        project_id=dataset.project_id,
+        filename=clean_filename,
+        file_path=cleaned_path,
+        file_type=dataset.file_type,
+        file_size=file_size,
+        file_hash=cleaned_hash,
+        version=next_version,
+        row_count=rows_after,
+        column_count=cols_after,
+        columns_info=cols_info,
+        status="cleaned"
+    )
+    db.add(cleaned_dataset)
+    await db.flush()
+
+    # 5. Create CleaningHistory linked to new dataset snapshot
     history = CleaningHistory(
-        dataset_id=dataset.id,
+        dataset_id=cleaned_dataset.id,
         steps_applied=steps,
         cleaned_file_path=cleaned_path,
         rows_before=rows_before,
@@ -81,6 +126,11 @@ async def apply_cleaning(dataset_id: str, config: CleaningConfig, db: AsyncSessi
     db.add(history)
     await db.commit()
     await db.refresh(history)
+
+    # Attach response metadata
+    history.new_dataset_id = cleaned_dataset.id  # type: ignore
+    history.dataset_version = next_version  # type: ignore
+    history.message = f"Cleaned dataset snapshot v{next_version} ({clean_filename}) created successfully."  # type: ignore
     return history
 
 @router.get("/datasets/{dataset_id}/clean/history", response_model=List[CleaningResponse])

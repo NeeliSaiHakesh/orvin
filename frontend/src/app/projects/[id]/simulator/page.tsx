@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { DatasetSelector } from '@/components/ui/DatasetSelector';
 import { Plot } from '@/components/ui/Plot';
+import { NoDatasetGate } from '@/components/ui/NoDatasetGate';
 import { api } from '@/lib/api';
 
 interface FeatureSchemaItem {
@@ -78,6 +79,7 @@ export default function SimulatorPage() {
   const [loading, setLoading] = useState(true);
   const [simulating, setSimulating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [searchFilter, setSearchFilter] = useState('');
 
   useEffect(() => {
@@ -102,8 +104,13 @@ export default function SimulatorPage() {
       setError(err.message || 'Failed to initialize simulator');
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
   };
+
+  if (!initialLoading && datasets.length === 0) {
+    return <NoDatasetGate projectId={projectId} pageName="What-If Simulator" pageDescription="Run scenario analysis, sensitivity curves, and architecture comparisons." />;
+  }
 
   const loadSchema = async (datasetId?: string) => {
     try {
