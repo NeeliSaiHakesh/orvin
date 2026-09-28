@@ -19,6 +19,10 @@ In modern enterprise software and machine learning systems:
 - **The Orvin Guardian**: Just as a vanguard protector stands at the frontlines, **Orvin** guards the boundary between developer pull requests and production deployment. By giving CI/CD pipelines **episodic memory**, Orvin remembers every past incident post-mortem, semantic stack trace, and applied remedy.
 - **Proactive Auto-Remediation**: When a high-risk change is detected, Orvin doesn't just block the PR—it autonomously synthesizes a compiler-safe, verified unified git `.patch` in seconds to unblock engineers safely.
 
+<p align="center">
+  <img src="assets/orvin_preflight_gate.png" alt="Orvin AI Pre-Flight Gate & Auto Patch Synthesis" width="100%" />
+</p>
+
 ---
 
 ## ⚡ Core Capabilities
@@ -45,6 +49,10 @@ In modern enterprise software and machine learning systems:
 - **Episodic Reflection (Retain, Recall, Reflect)**: Intercepts pull requests, manifests, and Dockerfiles to calculate blast-radius risk scores ($0\text{--}100\%$).
 - **Instant Git Patch Generation**: Auto-synthesizes tested unified git patches using Groq Llama 3.3 70B.
 - **Pre-Loaded Memory Banks**: Ready-to-demo incident memories including NumPy 2.0 ABI clashes, CUDA GPU OOM evictions, and Redis secret drifts.
+
+<p align="center">
+  <img src="assets/orvin_story_mode.png" alt="Orvin AI Story Mode & Episodic Reflection" width="100%" />
+</p>
 
 ### 2. Multi-Model AutoML Studio
 - Parallel training and benchmarking across 8+ algorithms (Random Forest, XGBoost, LightGBM, Gradient Boosting, Ridge, Logistic Regression, etc.).
