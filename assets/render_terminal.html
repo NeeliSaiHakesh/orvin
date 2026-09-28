@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0B0F19;
+    font-family: 'SF Pro Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+    padding: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  .window {
+    background: #0F172A;
+    border: 1px solid #1E293B;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    width: 100%;
+    max-width: 1050px;
+    overflow: hidden;
+  }
+  .titlebar {
+    background: #1E293B;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #334155;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #EF4444; }
+  .dot-yellow { background: #F59E0B; }
+  .dot-green { background: #10B981; }
+  .title { color: #94A3B8; font-size: 12px; font-weight: 600; margin-left: auto; margin-right: auto; }
+  .terminal-body {
+    padding: 20px 24px;
+    color: #F8FAFC;
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+  .header { color: #C084FC; font-weight: 700; margin-bottom: 12px; }
+  .subhead { color: #64748B; font-size: 12px; margin-bottom: 20px; }
+  .banner {
+    background: #1E293B;
+    border-left: 4px solid #38BDF8;
+    padding: 8px 14px;
+    color: #38BDF8;
+    font-weight: 700;
+    margin: 16px 0 10px 0;
+    border-radius: 0 8px 8px 0;
+  }
+  .step { color: #FBBF24; font-weight: 700; }
+  .key { color: #60A5FA; font-weight: 600; }
+  .val-success { color: #34D399; font-weight: 600; }
+  .val-danger { color: #F87171; font-weight: 600; }
+  .val-warn { color: #FBBF24; font-weight: 600; }
+  .val-info { color: #E2E8F0; }
+  .diff-box {
+    background: #020617;
+    border: 1px solid #1E293B;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin: 10px 0;
+    font-size: 12.5px;
+  }
+  .diff-del { color: #F87171; background: rgba(239, 68, 68, 0.15); padding: 2px 4px; border-radius: 4px; }
+  .diff-add { color: #34D399; background: rgba(16, 185, 129, 0.15); padding: 2px 4px; border-radius: 4px; font-weight: 600; }
+  .badge-veto {
+    display: inline-block;
+    background: #EF4444;
+    color: #FFFFFF;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-right: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="window">
+  <div class="titlebar">
+    <div class="dot dot-red"></div>
+    <div class="dot dot-yellow"></div>
+    <div class="dot dot-green"></div>
+    <div class="title">zsh — python3 -m app.engines.hindsight_devops_engine</div>
+  </div>
+  <div class="terminal-body">
+    <div class="header">
+      ORVIN AI — Autonomous Pre-Flight CI/CD Gate & Episodic Memory Reflection Engine<br>
+      <span class="subhead">Hindsight Memory SDK v0.4.2 &bull; Groq Llama 3.3 70B &bull; FastAPI</span>
+    </div>
+
+    <div class="banner">1. HINDSIGHT MEMORY: RETAIN INCIDENT POST-MORTEM</div>
+    <div><span class="step">[STEP 01]</span> hindsight_client.retain(bank_id='devops_postmortems_bank', ...)</div>
+    <div>&nbsp;&nbsp;<span class="key">• Incident ID</span> : <span class="val-info">INC-2026-104</span></div>
+    <div>&nbsp;&nbsp;<span class="key">• Incident Title</span> : <span class="val-info">Production Outage: NumPy 2.0 C-API ABI Breakage in Cython Extensions</span></div>
+    <div>&nbsp;&nbsp;<span class="key">• Root Cause</span> : <span class="val-danger">numpy>=2.0.0 changed PyArrayInterface struct alignment</span></div>
+    <div>&nbsp;&nbsp;<span class="key">• Resolution Rule</span> : <span class="val-success">Pin numpy>=1.24.0,&lt;2.0.0 until Cython wheels are recompiled</span></div>
+    <div>&nbsp;&nbsp;<span class="key">• Memory Bank Index</span> : <span class="val-info">384-dim semantic vector indexed in memory bank</span></div>
+    <div style="color:#10B981; font-weight:700; margin-top:4px;">&nbsp;&nbsp;✓ Ingested successfully into Hindsight Memory Bank (Latency: 42ms)</div>
+
+    <div class="banner">2. PR INGESTION & SEMANTIC INCIDENT RECALL</div>
+    <div><span class="step">[STEP 02]</span> Developer opens PR #412: "Bump ML dependencies for Q3 sprint"</div>
+    <div><span class="step">[STEP 03]</span> hindsight_client.recall(query=pr_diff, top_k=3)</div>
+    <div>&nbsp;&nbsp;<span class="key">• Matched Incident</span> : <span class="val-danger">INC-2026-104 (NumPy 2.0 ABI Clash)</span></div>
+    <div>&nbsp;&nbsp;<span class="key">• Semantic Confidence</span> : <span class="val-warn">94.8% (Cosine Distance: 0.052)</span></div>
+    <div>&nbsp;&nbsp;<span class="key">• Recalled Memory</span> : <span class="val-info">Cython C-extension ABI breakage risk detected</span></div>
+    <div style="color:#10B981; font-weight:700; margin-top:4px;">&nbsp;&nbsp;✓ Episodic memory successfully recalled (Latency: 28ms)</div>
+
+    <div class="banner">3. REFLECT: GROQ LLAMA 3.3 70B REASONING & AUTO-PATCH</div>
+    <div><span class="step">[STEP 04]</span> hindsight_engine.reflect(incident_context, pr_diff)</div>
+    <div>&nbsp;&nbsp;<span class="key">• Blast Radius Risk</span> : <span class="val-danger">85% (HIGH SEVERITY / CRITICAL MERGE VETO)</span></div>
+    <div>&nbsp;&nbsp;<span class="key">• Impact Analysis</span> : <span class="val-danger">Silent SIGSEGV crash during feature extraction pipeline</span></div>
+    <div>&nbsp;&nbsp;<span class="key">• Auto-Patch Status</span> : <span class="val-success">SYNTHESIZED & COMPILER VERIFIED</span></div>
+
+    <div class="diff-box">
+      <div style="color:#94A3B8; margin-bottom:4px;"># Synthesized Patch: patch_remediation_inc104.diff</div>
+      <div style="color:#64748B;">--- a/requirements.txt<br>+++ b/requirements.txt</div>
+      <div style="color:#38BDF8;">@@ -1,3 +1,3 @@</div>
+      <div class="diff-del">-numpy&gt;=2.0.0</div>
+      <div class="diff-add">+numpy&gt;=1.24.0,&lt;2.0.0 # Pin: Prevent Cython ABI clash (INC-104)</div>
+      <div style="color:#94A3B8;"> scikit-learn&gt;=1.4.0</div>
+    </div>
+
+    <div style="margin-top:12px;">
+      <span class="step">[STEP 05]</span> CI/CD Gate Decision:<br>
+      &nbsp;&nbsp;<span class="badge-veto">✖ CI/CD GATE BLOCKED (MERGE VETO)</span> <span style="color:#FBBF24; font-weight:700;">Auto-patch generated. One-click apply ready.</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>
