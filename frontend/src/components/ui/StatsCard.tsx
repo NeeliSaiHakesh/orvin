@@ -35,15 +35,15 @@ export function StatsCard({ label, value, icon, trend }: StatsCardProps) {
   return (
     <Card hover>
       <CardBody className="flex items-center gap-4">
-        <div className="p-4 bg-white/10 rounded-xl">
+        <div className="p-4 bg-[#FAF7F0] border border-[#E2DCD0] rounded-xl shrink-0">
           {icon}
         </div>
         <div>
-          <p className="text-gray-400 text-sm font-medium">{label}</p>
-          <div className="flex items-baseline gap-2">
-            <h3 className="text-3xl font-bold font-heading">{displayValue.toLocaleString()}</h3>
+          <p className="text-[#475569] text-xs font-semibold uppercase tracking-wider">{label}</p>
+          <div className="flex items-baseline gap-2 mt-0.5">
+            <h3 className="text-3xl font-extrabold font-heading text-[#0f172a]">{displayValue.toLocaleString()}</h3>
             {trend && (
-              <span className={`text-sm ${trend.isPositive ? 'text-green-400' : 'text-red-400'}`}>
+              <span className={`text-xs font-bold ${trend.isPositive ? 'text-emerald-700' : 'text-rose-700'}`}>
                 {trend.isPositive ? '+' : '-'}{Math.abs(trend.value)}%
               </span>
             )}

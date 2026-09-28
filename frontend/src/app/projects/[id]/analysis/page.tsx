@@ -113,24 +113,24 @@ export default function AnalysisPage() {
   };
 
   const plotLayout = {
-    paper_bgcolor: 'transparent',
-    plot_bgcolor: 'transparent',
-    font: { color: '#F9FAFB', size: 11 },
+    paper_bgcolor: '#FFFDF9',
+    plot_bgcolor: '#FFFDF9',
+    font: { color: '#0F172A', size: 11, family: 'inherit' },
     margin: { t: 30, b: 40, l: 50, r: 20 },
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in text-[#0F172A]">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold font-heading mb-2">Data Analysis</h1>
-          <p className="text-gray-400">Automated dataset profiling, correlations, and distributions.</p>
+          <h1 className="text-3xl font-bold font-heading mb-2 text-[#0F172A]">Data Analysis</h1>
+          <p className="text-[#475569]">Automated dataset profiling, correlations, and distributions.</p>
         </div>
-        <Button onClick={runAnalysis} disabled={analyzing || !selectedDataset}>
+        <Button onClick={runAnalysis} disabled={analyzing || !selectedDataset} className="bg-[#0F172A] hover:bg-[#1E293B] text-white">
           {analyzing ? (
             <><Loader2 className="w-4 h-4 animate-spin" /> Profiling...</>
           ) : (
-            <><Search className="w-4 h-4" /> Re-Analyze Dataset</>
+            <><Search className="w-4 h-4 text-amber-400" /> Re-Analyze Dataset</>
           )}
         </Button>
       </div>
@@ -144,29 +144,29 @@ export default function AnalysisPage() {
       />
 
       {error && (
-        <div className="glass border-red-500/30 bg-red-500/10 p-4 rounded-xl text-red-400">{error}</div>
+        <div className="bg-red-50 border border-red-200 p-4 rounded-xl text-red-800">{error}</div>
       )}
 
       {analyzing && !report && (
-        <Card>
+        <Card className="bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm">
           <CardBody className="text-center py-16">
-            <Loader2 className="w-12 h-12 mx-auto mb-4 text-purple-400 animate-spin" />
-            <p className="text-gray-400">Running automated dataset intelligence analysis...</p>
+            <Loader2 className="w-12 h-12 mx-auto mb-4 text-purple-700 animate-spin" />
+            <p className="text-[#475569]">Running automated dataset intelligence analysis...</p>
           </CardBody>
         </Card>
       )}
 
       {!report && !analyzing && (
-        <Card>
+        <Card className="bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm">
           <CardBody className="text-center py-16">
-            <BarChart3 className="w-16 h-16 mx-auto mb-4 text-gray-600" />
-            <p className="text-lg text-white font-semibold">No Analysis Report Generated Yet</p>
-            <p className="text-sm text-gray-400 mt-1 max-w-md mx-auto">
+            <BarChart3 className="w-16 h-16 mx-auto mb-4 text-[#94A3B8]" />
+            <p className="text-lg text-[#0F172A] font-bold">No Analysis Report Generated Yet</p>
+            <p className="text-sm text-[#475569] mt-1 max-w-md mx-auto">
               Click &quot;Run Dataset Analysis&quot; to calculate summary statistics, data type distributions, missing value percentages, and cross-feature correlations.
             </p>
             <div className="mt-6">
-              <Button onClick={runAnalysis} disabled={analyzing || !selectedDataset} className="mx-auto flex items-center gap-2">
-                <Search className="w-4 h-4" /> Run Dataset Analysis
+              <Button onClick={runAnalysis} disabled={analyzing || !selectedDataset} className="mx-auto flex items-center gap-2 bg-[#0F172A] hover:bg-[#1E293B] text-white">
+                <Search className="w-4 h-4 text-amber-400" /> Run Dataset Analysis
               </Button>
             </div>
           </CardBody>
@@ -175,33 +175,33 @@ export default function AnalysisPage() {
 
       {report && (
         <>
-          <Card glow>
-            <CardBody className="flex gap-6 items-start bg-gradient-to-r from-purple-900/20 to-cyan-900/20">
-              <div className="p-4 bg-purple-500/20 rounded-full shrink-0">
-                <Sparkles className="w-8 h-8 text-purple-400" />
+          <Card className="bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm">
+            <CardBody className="flex gap-6 items-start p-6">
+              <div className="p-4 bg-purple-100 rounded-2xl shrink-0">
+                <Sparkles className="w-8 h-8 text-purple-700" />
               </div>
               <div>
-                <h3 className="text-xl font-bold mb-2 text-white">AI Insights Summary</h3>
+                <h3 className="text-xl font-bold mb-2 text-[#0F172A]">AI Insights Summary</h3>
                 {report.ai_summary ? (
-                  <p className="text-gray-300">{report.ai_summary}</p>
+                  <p className="text-[#334155] font-medium leading-relaxed">{report.ai_summary}</p>
                 ) : (
-                  <div className="space-y-2 text-gray-300">
-                    <p>Dataset contains <strong className="text-white">{Object.keys(report.data_types || {}).length} columns</strong> with the following characteristics:</p>
+                  <div className="space-y-2 text-[#334155] font-medium">
+                    <p>Dataset contains <strong className="text-[#0F172A]">{Object.keys(report.data_types || {}).length} columns</strong> with the following characteristics:</p>
                     <ul className="space-y-1 text-sm">
                       {Object.entries(report.missing_values || {})
                         .filter(([k, v]: [string, any]) => k !== '__summary__' && v?.count > 0)
                         .slice(0, 5)
                         .map(([col, info]: [string, any]) => (
                           <li key={col} className="flex items-center gap-2">
-                            <AlertTriangle className="w-3 h-3 text-yellow-400" />
-                            <span>{col}: {info.count} missing ({info.percentage}%)</span>
+                            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                            <span><strong className="text-[#0F172A]">{col}:</strong> {info.count} missing ({info.percentage}%)</span>
                           </li>
                         ))
                       }
                     </ul>
                     {report.correlations?.high_correlations?.length > 0 && (
                       <p className="text-sm">
-                        <strong className="text-yellow-400">{report.correlations.high_correlations.length}</strong> highly correlated feature pairs detected.
+                        <strong className="text-amber-800 font-bold">{report.correlations.high_correlations.length}</strong> highly correlated feature pairs detected.
                       </p>
                     )}
                   </div>
@@ -211,13 +211,13 @@ export default function AnalysisPage() {
           </Card>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader><h3 className="font-bold flex items-center gap-2"><Hash className="w-4 h-4 text-cyan-400" /> Data Types</h3></CardHeader>
+            <Card className="bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm">
+              <CardHeader className="border-b border-[#E2DCD0]"><h3 className="font-bold flex items-center gap-2 text-[#0F172A]"><Hash className="w-4 h-4 text-cyan-700" /> Data Types</h3></CardHeader>
               <CardBody>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {Object.entries(report.data_types || {}).map(([col, dtype]) => (
-                    <div key={col} className="flex justify-between items-center py-1 px-2 rounded hover:bg-white/5">
-                      <span className="text-sm truncate mr-4">{col}</span>
+                    <div key={col} className="flex justify-between items-center py-1.5 px-2.5 rounded bg-[#FAF7F2] border border-[#E2DCD0]/60">
+                      <span className="text-sm font-semibold truncate mr-4 text-[#0F172A]">{col}</span>
                       <Badge variant={dtype === 'numeric' ? 'info' : dtype === 'categorical' ? 'warning' : 'neutral'}>{dtype}</Badge>
                     </div>
                   ))}
@@ -225,22 +225,22 @@ export default function AnalysisPage() {
               </CardBody>
             </Card>
 
-            <Card>
-              <CardHeader><h3 className="font-bold flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-yellow-400" /> Missing Values</h3></CardHeader>
+            <Card className="bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm">
+              <CardHeader className="border-b border-[#E2DCD0]"><h3 className="font-bold flex items-center gap-2 text-[#0F172A]"><AlertTriangle className="w-4 h-4 text-amber-600" /> Missing Values</h3></CardHeader>
               <CardBody>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {Object.entries(report.missing_values || {})
                     .filter(([k]) => k !== '__summary__')
                     .sort(([, a]: any, [, b]: any) => (b?.count || 0) - (a?.count || 0))
                     .map(([col, info]: [string, any]) => (
-                      <div key={col} className="flex justify-between items-center py-1 px-2 rounded hover:bg-white/5">
-                        <span className="text-sm truncate mr-4">{col}</span>
+                      <div key={col} className="flex justify-between items-center py-1.5 px-2.5 rounded bg-[#FAF7F2] border border-[#E2DCD0]/60">
+                        <span className="text-sm font-semibold truncate mr-4 text-[#0F172A]">{col}</span>
                         <div className="flex items-center gap-2">
-                          <div className="w-24 bg-white/10 rounded-full h-2 overflow-hidden">
-                            <div className={`h-2 rounded-full ${info.percentage > 10 ? 'bg-red-500' : info.percentage > 0 ? 'bg-yellow-500' : 'bg-green-500'}`}
+                          <div className="w-24 bg-[#E2DCD0] rounded-full h-2 overflow-hidden">
+                            <div className={`h-2 rounded-full ${info.percentage > 10 ? 'bg-rose-600' : info.percentage > 0 ? 'bg-amber-500' : 'bg-emerald-600'}`}
                               style={{ width: `${Math.max(info.percentage, 1)}%` }} />
                           </div>
-                          <span className="text-xs text-gray-400 w-16 text-right">{info.percentage}%</span>
+                          <span className="text-xs text-[#475569] font-mono font-bold w-16 text-right">{info.percentage}%</span>
                         </div>
                       </div>
                     ))
@@ -252,11 +252,11 @@ export default function AnalysisPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {getCorrelationData() && (
-              <Card>
-                <CardHeader><h3 className="font-bold">Correlation Heatmap</h3></CardHeader>
+              <Card className="bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm">
+                <CardHeader className="border-b border-[#E2DCD0]"><h3 className="font-bold text-[#0F172A]">Correlation Heatmap</h3></CardHeader>
                 <CardBody className="h-[350px]">
                   <Plot
-                    data={[{ ...getCorrelationData(), type: 'heatmap', colorscale: [[0, '#1a1a3e'], [0.5, '#4a1a6b'], [1, '#22D3EE']] }] as any}
+                    data={[{ ...getCorrelationData(), type: 'heatmap', colorscale: [[0, '#EFF6FF'], [0.5, '#93C5FD'], [1, '#1E40AF']] }] as any}
                     layout={{ ...plotLayout, margin: { ...plotLayout.margin, l: 100 } }}
                     useResizeHandler style={{ width: '100%', height: '100%' }}
                     config={{ displayModeBar: false }}
@@ -266,8 +266,8 @@ export default function AnalysisPage() {
             )}
 
             {getDistributionCharts().map((chart, i) => (
-              <Card key={i}>
-                <CardHeader><h3 className="font-bold">{chart.name} Distribution</h3></CardHeader>
+              <Card key={i} className="bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm">
+                <CardHeader className="border-b border-[#E2DCD0]"><h3 className="font-bold text-[#0F172A]">{chart.name} Distribution</h3></CardHeader>
                 <CardBody className="h-[300px]">
                   <Plot
                     data={chart.data as any}

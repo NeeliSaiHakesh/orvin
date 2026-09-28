@@ -196,7 +196,7 @@ export default function TrainingPage() {
       key: 'rank', header: 'Rank', 
       render: (_: ModelResult, index = 0) => (
         <div className="flex items-center gap-2">
-          {index === 0 ? <Trophy className="w-5 h-5 text-yellow-400" /> : <span className="w-5 text-center text-gray-500 font-mono">{index + 1}</span>}
+          {index === 0 ? <Trophy className="w-5 h-5 text-amber-500" /> : <span className="w-5 text-center text-[#475569] font-mono font-bold">{index + 1}</span>}
         </div>
       )
     },
@@ -205,17 +205,17 @@ export default function TrainingPage() {
       render: (item: ModelResult) => (
         <div>
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-white">{item.algorithm}</span>
-            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+            <span className="font-semibold text-[#0F172A]">{item.algorithm}</span>
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-purple-100 text-purple-900 border border-purple-300">
               v{item.version || 1}
             </span>
           </div>
-          <div className="flex items-center gap-2 text-[10px] text-gray-400 mt-0.5 font-mono">
-            <span className="text-cyan-400/80">Trained on Dataset v{item.dataset_version || 1}</span>
+          <div className="flex items-center gap-2 text-[10px] text-[#64748B] mt-0.5 font-mono">
+            <span className="text-cyan-800 font-medium">Trained on Dataset v{item.dataset_version || 1}</span>
             {item.metrics?.optimal_threshold && item.metrics.optimal_threshold !== 0.5 && (
               <>
                 <span>•</span>
-                <span className="text-emerald-400">Calibrated (thresh={item.metrics.optimal_threshold})</span>
+                <span className="text-emerald-800 font-medium">Calibrated (thresh={item.metrics.optimal_threshold})</span>
               </>
             )}
           </div>
@@ -229,16 +229,16 @@ export default function TrainingPage() {
         const std = item.metrics?.cv_std;
         return mean != null ? (
           <div className="flex flex-col">
-            <span className="text-cyan-300 font-bold font-mono">
+            <span className="text-cyan-800 font-bold font-mono">
               {(mean * 100).toFixed(1)}%
             </span>
             {std != null && (
-              <span className="text-[10px] text-gray-400 font-mono">
+              <span className="text-[10px] text-[#64748B] font-mono">
                 ± {(std * 100).toFixed(2)}% std
               </span>
             )}
           </div>
-        ) : <span className="text-gray-500">—</span>;
+        ) : <span className="text-[#94A3B8]">—</span>;
       }
     },
     { 
@@ -246,17 +246,17 @@ export default function TrainingPage() {
       render: (item: ModelResult, index = 0) => {
         const acc = item.metrics?.accuracy;
         return acc != null ? (
-          <span className={index === 0 ? 'text-green-400 font-bold font-mono' : 'font-mono'}>
+          <span className={index === 0 ? 'text-emerald-800 font-bold font-mono' : 'text-[#0F172A] font-medium font-mono'}>
             {(acc * 100).toFixed(1)}%
           </span>
-        ) : <span className="text-gray-500">—</span>;
+        ) : <span className="text-[#94A3B8]">—</span>;
       }
     },
     { 
       key: 'f1', header: 'F1 Score', sortable: true, 
       render: (item: ModelResult) => {
         const f1 = item.metrics?.f1;
-        return f1 != null ? <span className="font-mono">{f1.toFixed(3)}</span> : <span className="text-gray-500">—</span>;
+        return f1 != null ? <span className="font-mono text-[#0F172A] font-medium">{f1.toFixed(3)}</span> : <span className="text-[#94A3B8]">—</span>;
       }
     },
     { 
@@ -264,8 +264,8 @@ export default function TrainingPage() {
       render: (item: ModelResult) => {
         const auc = item.metrics?.roc_auc;
         return auc != null ? (
-          <span className="text-purple-300 font-mono font-medium">{auc.toFixed(3)}</span>
-        ) : <span className="text-gray-500">—</span>;
+          <span className="text-purple-800 font-mono font-bold">{auc.toFixed(3)}</span>
+        ) : <span className="text-[#94A3B8]">—</span>;
       }
     },
     { 
@@ -274,16 +274,16 @@ export default function TrainingPage() {
         const p = item.metrics?.precision;
         const r = item.metrics?.recall;
         return (p != null && r != null) ? (
-          <span className="text-xs text-gray-300 font-mono">
+          <span className="text-xs text-[#334155] font-mono font-medium">
             {(p * 100).toFixed(0)}% / {(r * 100).toFixed(0)}%
           </span>
-        ) : <span className="text-gray-500">—</span>;
+        ) : <span className="text-[#94A3B8]">—</span>;
       }
     },
     { 
       key: 'time', header: 'Speed', 
       render: (item: ModelResult) => (
-        <span className="flex items-center gap-1 text-gray-400 text-xs font-mono">
+        <span className="flex items-center gap-1 text-[#475569] text-xs font-mono">
           <Clock className="w-3 h-3" /> {item.training_time_seconds?.toFixed(2)}s
         </span>
       )
@@ -295,7 +295,7 @@ export default function TrainingPage() {
           <Button 
             size="sm" 
             variant="ghost"
-            className="flex items-center gap-1 text-xs text-purple-300 hover:text-white hover:bg-purple-500/20"
+            className="flex items-center gap-1 text-xs text-purple-700 hover:text-purple-900 hover:bg-purple-100"
             onClick={async () => {
               try {
                 const res = await api.training.getPipelineRecipe(item.id!);
@@ -325,7 +325,7 @@ export default function TrainingPage() {
       render: (item: ExperimentRun) => (
         <input 
           type="checkbox"
-          className="rounded border-gray-700 bg-gray-800 text-purple-600 focus:ring-purple-500 cursor-pointer"
+          className="rounded border-[#CBD5E1] text-purple-600 focus:ring-purple-500 cursor-pointer"
           checked={selectedRunIds.includes(item.id)}
           onChange={() => toggleRunSelection(item.id)}
         />
@@ -335,8 +335,8 @@ export default function TrainingPage() {
       key: 'run_name', header: 'Run Name & ID', sortable: true,
       render: (item: ExperimentRun) => (
         <div>
-          <div className="font-semibold text-white text-xs">{item.run_name}</div>
-          <div className="text-[10px] font-mono text-gray-500">ID: {item.id.slice(0, 8)}</div>
+          <div className="font-semibold text-[#0F172A] text-xs">{item.run_name}</div>
+          <div className="text-[10px] font-mono text-[#64748B]">ID: {item.id.slice(0, 8)}</div>
         </div>
       )
     },
@@ -344,11 +344,11 @@ export default function TrainingPage() {
       key: 'version', header: 'Model / Dataset', sortable: true,
       render: (item: ExperimentRun) => (
         <div className="flex items-center gap-1.5 font-mono text-xs">
-          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-900 border border-purple-300">
             v{item.model_version}
           </span>
-          <span className="text-gray-500">/</span>
-          <span className="text-cyan-400 text-[11px]">
+          <span className="text-[#64748B]">/</span>
+          <span className="text-cyan-800 font-medium text-[11px]">
             Data v{item.dataset_version}
           </span>
         </div>
@@ -357,7 +357,7 @@ export default function TrainingPage() {
     {
       key: 'algorithm', header: 'Algorithm', sortable: true,
       render: (item: ExperimentRun) => (
-        <Badge variant="neutral" className="font-mono text-xs">{item.algorithm}</Badge>
+        <Badge variant="neutral" className="font-mono text-xs text-[#0F172A] bg-[#FAF7F2] border-[#E2DCD0]">{item.algorithm}</Badge>
       )
     },
     {
@@ -367,12 +367,12 @@ export default function TrainingPage() {
         return (
           <div className="flex flex-wrap gap-1 max-w-xs">
             {entries.slice(0, 2).map(([k, v]) => (
-              <span key={k} className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white/5 border border-white/10 text-gray-300">
+              <span key={k} className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#FAF7F2] border border-[#E2DCD0] text-[#0F172A]">
                 {k}: {String(v)}
               </span>
             ))}
             {entries.length > 2 && (
-              <span className="text-[10px] text-gray-500 font-mono">+{entries.length - 2} more</span>
+              <span className="text-[10px] text-[#64748B] font-mono">+{entries.length - 2} more</span>
             )}
           </div>
         );
@@ -383,10 +383,10 @@ export default function TrainingPage() {
       render: (item: ExperimentRun) => {
         const acc = item.metrics?.accuracy ?? item.metrics?.r2;
         return acc != null ? (
-          <span className="text-green-400 font-bold font-mono text-xs">
+          <span className="text-emerald-800 font-bold font-mono text-xs">
             {typeof acc === 'number' ? (acc <= 1.0 ? `${(acc * 100).toFixed(1)}%` : acc.toFixed(3)) : String(acc)}
           </span>
-        ) : <span className="text-gray-500">—</span>;
+        ) : <span className="text-[#94A3B8]">—</span>;
       }
     },
     {
@@ -394,14 +394,14 @@ export default function TrainingPage() {
       render: (item: ExperimentRun) => {
         const f1 = item.metrics?.f1;
         return f1 != null && typeof f1 === 'number' ? (
-          <span className="text-purple-300 font-mono text-xs">{f1.toFixed(3)}</span>
-        ) : <span className="text-gray-500">—</span>;
+          <span className="text-purple-800 font-mono text-xs font-bold">{f1.toFixed(3)}</span>
+        ) : <span className="text-[#94A3B8]">—</span>;
       }
     },
     {
       key: 'duration', header: 'Duration', sortable: true,
       render: (item: ExperimentRun) => (
-        <span className="text-gray-400 text-xs font-mono">
+        <span className="text-[#475569] text-xs font-mono">
           {item.duration_seconds?.toFixed(2)}s
         </span>
       )
@@ -409,7 +409,7 @@ export default function TrainingPage() {
     {
       key: 'created_at', header: 'Timestamp', sortable: true,
       render: (item: ExperimentRun) => (
-        <span className="text-[11px] text-gray-400 font-mono">
+        <span className="text-[11px] text-[#475569] font-mono">
           {item.created_at ? new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '—'}
         </span>
       )
@@ -420,12 +420,12 @@ export default function TrainingPage() {
     <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold font-heading mb-2">Model Training & Quality Benchmark</h1>
-          <p className="text-gray-400">
+          <h1 className="text-3xl font-bold font-heading mb-2 text-[#0F172A]">Model Training & Quality Benchmark</h1>
+          <p className="text-[#475569]">
             AutoML with strict deduplication, 5-Fold Stratified Cross-Validation, and MLflow-style experiment tracking.
           </p>
         </div>
-        <Button onClick={startTraining} disabled={isTraining} className="flex items-center gap-2">
+        <Button onClick={startTraining} disabled={isTraining} className="flex items-center gap-2 bg-[#0F172A] hover:bg-[#1E293B] text-white">
           {isTraining ? (
             <>
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -433,7 +433,7 @@ export default function TrainingPage() {
             </>
           ) : (
             <>
-              <Zap className="w-4 h-4" /> Start AutoML Training
+              <Zap className="w-4 h-4 text-amber-400" /> Start AutoML Training
             </>
           )}
         </Button>
@@ -470,29 +470,29 @@ export default function TrainingPage() {
       />
 
       {error && (
-        <div className="glass border-red-500/30 bg-red-500/10 p-4 rounded-xl text-red-400">
+        <div className="bg-red-50 border border-red-200 p-4 rounded-xl text-red-800">
           {error}
         </div>
       )}
 
       {isTraining && (
-        <Card glow>
+        <Card className="bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm">
           <CardBody>
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                <Zap className="w-5 h-5 text-purple-400 animate-pulse" />
+              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Zap className="w-5 h-5 text-purple-700 animate-pulse" />
               </div>
-              <h3 className="font-bold">Stratified Training & Cross-Validation in progress...</h3>
+              <h3 className="font-bold text-[#0F172A]">Stratified Training & Cross-Validation in progress...</h3>
             </div>
-            <div className="w-full bg-white/10 rounded-full h-3 mb-2 overflow-hidden">
+            <div className="w-full bg-[#E2DCD0] rounded-full h-3 mb-2 overflow-hidden">
               <div 
-                className="bg-gradient-to-r from-purple-500 to-cyan-500 h-3 transition-all duration-300 rounded-full" 
+                className="bg-[#0F172A] h-3 transition-all duration-300 rounded-full" 
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <div className="flex justify-between text-sm text-gray-400">
+            <div className="flex justify-between text-sm text-[#475569]">
               <span>Running 5-fold CV, probability calibration, and holdout evaluation...</span>
-              <span>{progress}%</span>
+              <span className="font-bold text-[#0F172A]">{progress}%</span>
             </div>
           </CardBody>
         </Card>
@@ -500,45 +500,45 @@ export default function TrainingPage() {
 
       {/* Data Quality & Statistical Audit Summary */}
       {datasetStats && (
-        <Card className="border border-cyan-500/20 bg-gradient-to-r from-cyan-950/20 via-transparent to-purple-950/20">
+        <Card className="border border-[#E2DCD0] bg-[#FFFDF9] shadow-sm">
           <CardBody>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-cyan-400">
+                <div className="p-3 bg-cyan-100 border border-cyan-200 rounded-xl text-cyan-800">
                   <ShieldCheck className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-white text-sm">Data Quality & Statistical Audit</h4>
-                  <p className="text-xs text-gray-400">Validated prior to train-test partition</p>
+                  <h4 className="font-bold text-[#0F172A] text-sm">Data Quality & Statistical Audit</h4>
+                  <p className="text-xs text-[#475569]">Validated prior to train-test partition</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono">
-                <div className="glass p-2.5 rounded-lg border border-white/10">
-                  <span className="text-gray-400 block text-[10px] uppercase">Total Rows</span>
-                  <span className="text-white font-bold text-sm">{datasetStats.total_rows ?? '—'}</span>
+                <div className="p-2.5 rounded-lg border border-[#E2DCD0] bg-[#FAF7F2]">
+                  <span className="text-[#64748B] block text-[10px] uppercase font-bold">Total Rows</span>
+                  <span className="text-[#0F172A] font-bold text-sm">{datasetStats.total_rows ?? '—'}</span>
                 </div>
-                <div className="glass p-2.5 rounded-lg border border-white/10">
-                  <span className="text-gray-400 block text-[10px] uppercase">Duplicates Dropped</span>
-                  <span className="text-emerald-400 font-bold text-sm">{datasetStats.duplicates_removed ?? 0}</span>
+                <div className="p-2.5 rounded-lg border border-[#E2DCD0] bg-[#FAF7F2]">
+                  <span className="text-[#64748B] block text-[10px] uppercase font-bold">Duplicates Dropped</span>
+                  <span className="text-emerald-800 font-bold text-sm">{datasetStats.duplicates_removed ?? 0}</span>
                 </div>
-                <div className="glass p-2.5 rounded-lg border border-white/10">
-                  <span className="text-gray-400 block text-[10px] uppercase">Unique Clean Rows</span>
-                  <span className="text-cyan-300 font-bold text-sm">{datasetStats.unique_rows ?? datasetStats.total_rows ?? '—'}</span>
+                <div className="p-2.5 rounded-lg border border-[#E2DCD0] bg-[#FAF7F2]">
+                  <span className="text-[#64748B] block text-[10px] uppercase font-bold">Unique Clean Rows</span>
+                  <span className="text-cyan-800 font-bold text-sm">{datasetStats.unique_rows ?? datasetStats.total_rows ?? '—'}</span>
                 </div>
-                <div className="glass p-2.5 rounded-lg border border-white/10">
-                  <span className="text-gray-400 block text-[10px] uppercase">Train / Test Split</span>
-                  <span className="text-purple-300 font-bold text-sm">
+                <div className="p-2.5 rounded-lg border border-[#E2DCD0] bg-[#FAF7F2]">
+                  <span className="text-[#64748B] block text-[10px] uppercase font-bold">Train / Test Split</span>
+                  <span className="text-purple-800 font-bold text-sm">
                     {datasetStats.train_rows ? `${datasetStats.train_rows} / ${datasetStats.test_rows}` : '80% / 20%'}
                   </span>
                 </div>
               </div>
             </div>
             {datasetStats.small_dataset_warning && (
-              <div className="mt-4 p-3 rounded-xl border border-yellow-500/30 bg-yellow-500/10 flex items-start gap-3">
-                <span className="text-yellow-400 text-lg leading-none mt-0.5">⚠</span>
+              <div className="mt-4 p-3 rounded-xl border border-amber-200 bg-amber-50 flex items-start gap-3">
+                <span className="text-amber-700 text-lg leading-none mt-0.5">⚠</span>
                 <div>
-                  <p className="text-yellow-300 text-xs font-semibold">Small Dataset Warning</p>
-                  <p className="text-yellow-200/70 text-xs mt-0.5">
+                  <p className="text-amber-900 text-xs font-semibold">Small Dataset Warning</p>
+                  <p className="text-amber-800 text-xs mt-0.5">
                     Your test set has fewer than 20 samples ({datasetStats.test_rows} rows). 
                     Metrics like 100% accuracy on 2–3 test samples are statistically unreliable. 
                     Upload a larger dataset for meaningful model evaluation.
@@ -551,35 +551,35 @@ export default function TrainingPage() {
       )}
 
       {/* View Switcher: Leaderboard vs. Experiments */}
-      <div className="flex items-center justify-between border-b border-white/10 pb-4">
+      <div className="flex items-center justify-between border-b border-[#E2DCD0] pb-4">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setActiveTab('leaderboard')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
               activeTab === 'leaderboard'
-                ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                ? 'bg-[#0F172A] text-white shadow-sm'
+                : 'text-[#475569] hover:text-[#0F172A] hover:bg-[#FAF7F2]'
             }`}
           >
             <Trophy className="w-4 h-4" /> Benchmark Leaderboard
-            <Badge variant="neutral" className="text-[10px] ml-1">{leaderboard.length}</Badge>
+            <Badge variant="neutral" className="text-[10px] ml-1 bg-white/20 text-inherit">{leaderboard.length}</Badge>
           </button>
           <button
             onClick={() => setActiveTab('experiments')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
               activeTab === 'experiments'
-                ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-500/25'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                ? 'bg-[#0F172A] text-white shadow-sm'
+                : 'text-[#475569] hover:text-[#0F172A] hover:bg-[#FAF7F2]'
             }`}
           >
             <Activity className="w-4 h-4" /> Experiment Tracking (MLflow)
-            <Badge variant="neutral" className="text-[10px] ml-1">{experimentRuns.length}</Badge>
+            <Badge variant="neutral" className="text-[10px] ml-1 bg-white/20 text-inherit">{experimentRuns.length}</Badge>
           </button>
         </div>
 
         {activeTab === 'experiments' && (
           <div className="flex items-center gap-3">
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-[#475569]">
               {selectedRunIds.length} run{selectedRunIds.length === 1 ? '' : 's'} selected
             </span>
             <Button
@@ -587,7 +587,7 @@ export default function TrainingPage() {
               variant="secondary"
               disabled={selectedRunIds.length < 2 || isComparing}
               onClick={handleCompareRuns}
-              className="flex items-center gap-1.5 text-xs bg-gradient-to-r from-purple-500/20 to-cyan-500/20 hover:from-purple-500/30 hover:to-cyan-500/30 border border-cyan-500/30 text-cyan-300"
+              className="flex items-center gap-1.5 text-xs bg-[#FFFDF9] hover:bg-[#FAF7F2] border border-[#E2DCD0] text-[#0F172A]"
             >
               <GitCompare className="w-3.5 h-3.5" />
               {isComparing ? 'Comparing...' : 'Compare Selected Runs'}
@@ -601,36 +601,36 @@ export default function TrainingPage() {
           {/* Stats Row */}
           {leaderboard.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
+              <Card className="bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm">
                 <CardBody className="flex items-center gap-4">
-                  <div className="p-3 bg-purple-500/20 rounded-xl">
-                    <Target className="w-6 h-6 text-purple-400" />
+                  <div className="p-3 bg-purple-100 rounded-xl">
+                    <Target className="w-6 h-6 text-purple-700" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-400">Validated Algorithms</p>
-                    <p className="text-2xl font-bold">{leaderboard.length}</p>
+                    <p className="text-sm text-[#475569]">Validated Algorithms</p>
+                    <p className="text-2xl font-bold text-[#0F172A]">{leaderboard.length}</p>
                   </div>
                 </CardBody>
               </Card>
-              <Card>
+              <Card className="bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm">
                 <CardBody className="flex items-center gap-4">
-                  <div className="p-3 bg-green-500/20 rounded-xl">
-                    <Trophy className="w-6 h-6 text-green-400" />
+                  <div className="p-3 bg-emerald-100 rounded-xl">
+                    <Trophy className="w-6 h-6 text-emerald-700" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-400">Top Ranked Model</p>
-                    <p className="text-2xl font-bold">{leaderboard[0]?.algorithm}</p>
+                    <p className="text-sm text-[#475569]">Top Ranked Model</p>
+                    <p className="text-2xl font-bold text-[#0F172A]">{leaderboard[0]?.algorithm}</p>
                   </div>
                 </CardBody>
               </Card>
-              <Card>
+              <Card className="bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm">
                 <CardBody className="flex items-center gap-4">
-                  <div className="p-3 bg-cyan-500/20 rounded-xl">
-                    <Zap className="w-6 h-6 text-cyan-400" />
+                  <div className="p-3 bg-cyan-100 rounded-xl">
+                    <Zap className="w-6 h-6 text-cyan-700" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-400">5-Fold CV Score (Mean ± Std)</p>
-                    <p className="text-xl font-bold font-mono text-cyan-300">
+                    <p className="text-sm text-[#475569]">5-Fold CV Score (Mean ± Std)</p>
+                    <p className="text-xl font-bold font-mono text-cyan-900">
                       {leaderboard[0]?.metrics?.cv_mean
                         ? `${(leaderboard[0].metrics.cv_mean * 100).toFixed(1)}% ± ${( (leaderboard[0].metrics.cv_std || 0) * 100).toFixed(1)}%`
                         : leaderboard[0]?.metrics?.accuracy
@@ -643,20 +643,20 @@ export default function TrainingPage() {
             </div>
           )}
 
-          <Card>
+          <Card className="bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm">
             <CardHeader>
-              <h3 className="font-bold text-xl flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-yellow-400" /> Model Benchmark Leaderboard
+              <h3 className="font-bold text-xl flex items-center gap-2 text-[#0F172A]">
+                <Trophy className="w-5 h-5 text-amber-500" /> Model Benchmark Leaderboard
               </h3>
             </CardHeader>
             {leaderboard.length > 0 ? (
               <DataTable data={leaderboard} columns={leaderboardColumns} />
             ) : (
               <CardBody>
-                <div className="text-center py-12 text-gray-500">
-                  <Zap className="w-12 h-12 mx-auto mb-4 text-purple-400" />
-                  <p className="text-lg text-white font-medium">Ready to Train AutoML</p>
-                  <p className="text-sm mt-1 text-gray-400">
+                <div className="text-center py-12 text-[#64748B]">
+                  <Zap className="w-12 h-12 mx-auto mb-4 text-purple-700" />
+                  <p className="text-lg text-[#0F172A] font-semibold">Ready to Train AutoML</p>
+                  <p className="text-sm mt-1 text-[#475569]">
                     Click &quot;Start AutoML Training&quot; to deduplicate data, run 5-Fold Stratified CV, calibrate thresholds, and rank models.
                   </p>
                 </div>
@@ -665,13 +665,13 @@ export default function TrainingPage() {
           </Card>
         </div>
       ) : (
-        <Card>
+        <Card className="bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm">
           <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h3 className="font-bold text-xl flex items-center gap-2">
-                <Activity className="w-5 h-5 text-cyan-400" /> MLflow-Style Experiment Runs
+              <h3 className="font-bold text-xl flex items-center gap-2 text-[#0F172A]">
+                <Activity className="w-5 h-5 text-cyan-700" /> MLflow-Style Experiment Runs
               </h3>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-[#475569] mt-1">
                 Every training iteration is logged with parameters, metrics, duration, and data lineage. Select 2 or more to compare.
               </p>
             </div>
@@ -686,7 +686,7 @@ export default function TrainingPage() {
                     setSelectedRunIds(experimentRuns.map(r => r.id));
                   }
                 }}
-                className="text-xs text-gray-400 hover:text-white"
+                className="text-xs text-[#475569] hover:text-[#0F172A]"
               >
                 {selectedRunIds.length === experimentRuns.length ? 'Deselect All' : 'Select All'}
               </Button>
@@ -696,10 +696,10 @@ export default function TrainingPage() {
             <DataTable data={experimentRuns} columns={experimentColumns} />
           ) : (
             <CardBody>
-              <div className="text-center py-12 text-gray-500">
-                <Activity className="w-12 h-12 mx-auto mb-4 text-cyan-400" />
-                <p className="text-lg text-white font-medium">No Experiment Runs Yet</p>
-                <p className="text-sm mt-1 text-gray-400">
+              <div className="text-center py-12 text-[#64748B]">
+                <Activity className="w-12 h-12 mx-auto mb-4 text-cyan-700" />
+                <p className="text-lg text-[#0F172A] font-semibold">No Experiment Runs Yet</p>
+                <p className="text-sm mt-1 text-[#475569]">
                   Run a training cycle to automatically record hyperparameters, evaluation metrics, and run artifacts.
                 </p>
               </div>
@@ -710,25 +710,25 @@ export default function TrainingPage() {
 
       {/* Multi-Run Side-by-Side Comparison Modal */}
       {compareModalOpen && comparisonData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-          <div className="bg-gray-900 border border-cyan-500/30 rounded-2xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-white/10 bg-gradient-to-r from-purple-950/40 via-gray-900 to-cyan-950/40">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#FFFDF9] border border-[#E2DCD0] rounded-2xl max-w-5xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-[#E2DCD0] bg-[#FAF7F2]">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-cyan-500/20 rounded-lg text-cyan-400">
+                <div className="p-2 bg-cyan-100 rounded-lg text-cyan-800">
                   <GitCompare className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-base">
+                  <h3 className="font-bold text-[#0F172A] text-base">
                     Experiment Run Comparison ({comparisonData.runs?.length} Runs)
                   </h3>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-[#475569]">
                     Side-by-side metric deltas and hyperparameter variance
                   </p>
                 </div>
               </div>
               <button 
                 onClick={() => setCompareModalOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                className="p-1.5 rounded-lg hover:bg-[#E2DCD0] text-[#475569] hover:text-[#0F172A] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -744,22 +744,22 @@ export default function TrainingPage() {
                       key={run.id}
                       className={`p-3.5 rounded-xl border transition-all ${
                         isBest 
-                          ? 'border-green-500/40 bg-green-500/10 shadow-lg shadow-green-500/10' 
-                          : 'border-white/10 bg-white/5'
+                          ? 'border-emerald-300 bg-emerald-50/50 shadow-sm' 
+                          : 'border-[#E2DCD0] bg-[#FAF7F2]'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="font-bold text-white text-sm">{run.algorithm}</span>
+                        <span className="font-bold text-[#0F172A] text-sm">{run.algorithm}</span>
                         {isBest && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-500/20 text-green-300 border border-green-500/30 flex items-center gap-1">
-                            <Trophy className="w-3 h-3 text-yellow-400" /> Best
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-1">
+                            <Trophy className="w-3 h-3 text-amber-500" /> Best
                           </span>
                         )}
                       </div>
-                      <div className="text-[11px] font-mono text-gray-400 space-y-0.5">
-                        <div>Run: <span className="text-gray-300">{run.run_name}</span></div>
-                        <div>Version: <span className="text-purple-300">v{run.model_version}</span> (Data v{run.dataset_version})</div>
-                        <div>Duration: <span className="text-cyan-300">{run.duration_seconds?.toFixed(2)}s</span></div>
+                      <div className="text-[11px] font-mono text-[#64748B] space-y-0.5">
+                        <div>Run: <span className="text-[#0F172A]">{run.run_name}</span></div>
+                        <div>Version: <span className="text-purple-800 font-bold">v{run.model_version}</span> (Data v{run.dataset_version})</div>
+                        <div>Duration: <span className="text-cyan-800 font-medium">{run.duration_seconds?.toFixed(2)}s</span></div>
                       </div>
                     </div>
                   );
@@ -768,12 +768,12 @@ export default function TrainingPage() {
 
               {/* Metrics Comparison Table */}
               <div>
-                <h4 className="font-bold text-white text-sm mb-2 flex items-center gap-1.5">
-                  <BarChart3 className="w-4 h-4 text-green-400" /> Key Metrics Comparison
+                <h4 className="font-bold text-[#0F172A] text-sm mb-2 flex items-center gap-1.5">
+                  <BarChart3 className="w-4 h-4 text-emerald-700" /> Key Metrics Comparison
                 </h4>
-                <div className="border border-white/10 rounded-xl overflow-hidden bg-black/40">
+                <div className="border border-[#E2DCD0] rounded-xl overflow-hidden bg-[#FAF7F2]">
                   <table className="w-full text-left font-mono">
-                    <thead className="bg-white/5 text-gray-400 text-[11px] border-b border-white/10 uppercase">
+                    <thead className="bg-[#F4EFE6] text-[#475569] text-[11px] border-b border-[#E2DCD0] uppercase">
                       <tr>
                         <th className="p-3">Metric</th>
                         {comparisonData.runs?.map((run: ExperimentRun) => (
@@ -783,10 +783,10 @@ export default function TrainingPage() {
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
+                    <tbody className="divide-y divide-[#E2DCD0]">
                       {comparisonData.metrics_comparison?.map((m: any) => (
-                        <tr key={m.metric_name} className="hover:bg-white/[0.02]">
-                          <td className="p-3 font-semibold text-gray-300 capitalize">
+                        <tr key={m.metric_name} className="hover:bg-[#E2DCD0]/30">
+                          <td className="p-3 font-semibold text-[#0F172A] capitalize">
                             {m.metric_name.replace(/_/g, ' ')}
                           </td>
                           {comparisonData.runs?.map((run: ExperimentRun) => {
@@ -794,11 +794,11 @@ export default function TrainingPage() {
                             return (
                               <td key={run.id} className="p-3">
                                 {val != null ? (
-                                  <span className={typeof val === 'number' && val > 0.8 ? 'text-green-400 font-bold' : 'text-gray-200'}>
+                                  <span className={typeof val === 'number' && val > 0.8 ? 'text-emerald-800 font-bold' : 'text-[#0F172A]'}>
                                     {typeof val === 'number' ? (val <= 1.0 && val >= 0 ? val.toFixed(4) : val.toFixed(2)) : String(val)}
                                   </span>
                                 ) : (
-                                  <span className="text-gray-600">—</span>
+                                  <span className="text-[#94A3B8]">—</span>
                                 )}
                               </td>
                             );
@@ -812,12 +812,12 @@ export default function TrainingPage() {
 
               {/* Hyperparameter Diffs Table */}
               <div>
-                <h4 className="font-bold text-white text-sm mb-2 flex items-center gap-1.5">
-                  <Sliders className="w-4 h-4 text-purple-400" /> Hyperparameter Breakdown & Diffs
+                <h4 className="font-bold text-[#0F172A] text-sm mb-2 flex items-center gap-1.5">
+                  <Sliders className="w-4 h-4 text-purple-700" /> Hyperparameter Breakdown & Diffs
                 </h4>
-                <div className="border border-white/10 rounded-xl overflow-hidden bg-black/40">
+                <div className="border border-[#E2DCD0] rounded-xl overflow-hidden bg-[#FAF7F2]">
                   <table className="w-full text-left font-mono">
-                    <thead className="bg-white/5 text-gray-400 text-[11px] border-b border-white/10 uppercase">
+                    <thead className="bg-[#F4EFE6] text-[#475569] text-[11px] border-b border-[#E2DCD0] uppercase">
                       <tr>
                         <th className="p-3">Parameter</th>
                         {comparisonData.runs?.map((run: ExperimentRun) => (
@@ -827,17 +827,17 @@ export default function TrainingPage() {
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
+                    <tbody className="divide-y divide-[#E2DCD0]">
                       {comparisonData.parameter_diffs?.map((p: any) => (
-                        <tr key={p.param_name} className="hover:bg-white/[0.02]">
-                          <td className="p-3 font-semibold text-purple-300">
+                        <tr key={p.param_name} className="hover:bg-[#E2DCD0]/30">
+                          <td className="p-3 font-semibold text-purple-800">
                             {p.param_name}
                           </td>
                           {comparisonData.runs?.map((run: ExperimentRun) => {
                             const val = p.values?.[run.id];
                             return (
-                              <td key={run.id} className="p-3 text-gray-300">
-                                {val != null ? String(val) : <span className="text-gray-600">default</span>}
+                              <td key={run.id} className="p-3 text-[#0F172A]">
+                                {val != null ? String(val) : <span className="text-[#94A3B8]">default</span>}
                               </td>
                             );
                           })}
@@ -849,11 +849,12 @@ export default function TrainingPage() {
               </div>
             </div>
 
-            <div className="p-4 border-t border-white/10 bg-white/5 flex justify-end">
+            <div className="p-4 border-t border-[#E2DCD0] bg-[#FAF7F2] flex justify-end">
               <Button 
                 size="sm" 
                 variant="secondary"
                 onClick={() => setCompareModalOpen(false)}
+                className="bg-[#FFFDF9] border border-[#E2DCD0] text-[#0F172A]"
               >
                 Close Comparison
               </Button>
@@ -864,77 +865,78 @@ export default function TrainingPage() {
 
       {/* Pipeline Recipe JSON Modal */}
       {recipeModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="bg-gray-900 border border-purple-500/30 rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-white/10 bg-white/5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#FFFDF9] border border-[#E2DCD0] rounded-2xl max-w-3xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-[#E2DCD0] bg-[#FAF7F2]">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 bg-purple-500/20 rounded-lg text-purple-400">
+                <div className="p-2 bg-purple-100 rounded-lg text-purple-800">
                   <FileCode className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-base">
-                    Pipeline Recipe: {recipeModal.model?.algorithm} <span className="text-purple-400 font-mono">v{recipeModal.model?.version || 1}</span>
+                  <h3 className="font-bold text-[#0F172A] text-base">
+                    Pipeline Recipe: {recipeModal.model?.algorithm} <span className="text-purple-800 font-mono">v{recipeModal.model?.version || 1}</span>
                   </h3>
-                  <p className="text-xs text-gray-400 font-mono">
+                  <p className="text-xs text-[#475569] font-mono">
                     Tied to Dataset v{recipeModal.model?.dataset_version || 1} • Immutable Transformation Config
                   </p>
                 </div>
               </div>
               <button 
                 onClick={() => setRecipeModal({ isOpen: false, model: null, recipe: null })}
-                className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                className="p-1.5 rounded-lg hover:bg-[#E2DCD0] text-[#475569] hover:text-[#0F172A] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="p-4 overflow-y-auto space-y-4 flex-1 font-mono text-xs">
-              <div className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/10">
+              <div className="flex items-center justify-between bg-[#FAF7F2] p-3 rounded-xl border border-[#E2DCD0]">
                 <div className="flex items-center gap-4 text-xs">
                   <div>
-                    <span className="text-gray-400 block text-[10px] uppercase">Target</span>
-                    <span className="text-cyan-300 font-bold">{recipeModal.recipe?.target?.column || 'churn'}</span>
+                    <span className="text-[#64748B] block text-[10px] uppercase font-bold">Target</span>
+                    <span className="text-cyan-800 font-bold">{recipeModal.recipe?.target?.column || 'churn'}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400 block text-[10px] uppercase">Task</span>
-                    <span className="text-purple-300 font-bold">{recipeModal.recipe?.target?.task_type || 'classification'}</span>
+                    <span className="text-[#64748B] block text-[10px] uppercase font-bold">Task</span>
+                    <span className="text-purple-800 font-bold">{recipeModal.recipe?.target?.task_type || 'classification'}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400 block text-[10px] uppercase">Features</span>
-                    <span className="text-emerald-300 font-bold">{recipeModal.recipe?.feature_engineering_recipe?.feature_count ?? 'Auto'} cols</span>
+                    <span className="text-[#64748B] block text-[10px] uppercase font-bold">Features</span>
+                    <span className="text-emerald-800 font-bold">{recipeModal.recipe?.feature_engineering_recipe?.feature_count ?? 'Auto'} cols</span>
                   </div>
                   <div>
-                    <span className="text-gray-400 block text-[10px] uppercase">CV Folds</span>
-                    <span className="text-yellow-300 font-bold">{recipeModal.recipe?.validation_split_recipe?.cv_folds ?? 5}-fold</span>
+                    <span className="text-[#64748B] block text-[10px] uppercase font-bold">CV Folds</span>
+                    <span className="text-amber-800 font-bold">{recipeModal.recipe?.validation_split_recipe?.cv_folds ?? 5}-fold</span>
                   </div>
                 </div>
                 <Button 
                   size="sm" 
                   variant="secondary"
-                  className="flex items-center gap-1.5 text-xs"
+                  className="flex items-center gap-1.5 text-xs bg-[#FFFDF9] border border-[#E2DCD0] text-[#0F172A]"
                   onClick={() => {
                     navigator.clipboard.writeText(JSON.stringify(recipeModal.recipe, null, 2));
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
                   }}
                 >
-                  {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-700" /> : <Copy className="w-3.5 h-3.5" />}
                   {copied ? 'Copied!' : 'Copy Recipe JSON'}
                 </Button>
               </div>
 
               <div className="relative">
-                <pre className="p-4 rounded-xl bg-black/60 border border-white/10 text-cyan-300 overflow-x-auto text-xs leading-relaxed max-h-96">
+                <pre className="p-4 rounded-xl bg-[#FAF7F2] border border-[#E2DCD0] text-[#0F172A] overflow-x-auto text-xs leading-relaxed max-h-96">
                   {JSON.stringify(recipeModal.recipe, null, 2)}
                 </pre>
               </div>
             </div>
 
-            <div className="p-3 border-t border-white/10 bg-white/5 flex justify-end">
+            <div className="p-3 border-t border-[#E2DCD0] bg-[#FAF7F2] flex justify-end">
               <Button 
                 size="sm" 
                 variant="secondary"
                 onClick={() => setRecipeModal({ isOpen: false, model: null, recipe: null })}
+                className="bg-[#FFFDF9] border border-[#E2DCD0] text-[#0F172A]"
               >
                 Close
               </Button>

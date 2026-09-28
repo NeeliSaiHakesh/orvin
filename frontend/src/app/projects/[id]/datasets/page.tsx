@@ -122,7 +122,7 @@ export default function DatasetsPage() {
     {
       key: 'version', header: 'Ver', sortable: true,
       render: (item: Dataset) => (
-        <span className="px-2 py-0.5 rounded-md bg-purple-500/20 border border-purple-500/30 text-purple-300 font-mono font-bold text-xs">
+        <span className="px-2 py-0.5 rounded-md bg-purple-100 border border-purple-300 text-purple-900 font-mono font-bold text-xs">
           v{item.version || 1}
         </span>
       )
@@ -133,13 +133,13 @@ export default function DatasetsPage() {
         <div className="flex items-center gap-3">
           {getFileIcon(item.file_type)}
           <div>
-            <p className="font-medium text-white">{item.filename}</p>
-            <div className="flex items-center gap-2 text-xs text-gray-400">
+            <p className="font-semibold text-[#0F172A]">{item.filename}</p>
+            <div className="flex items-center gap-2 text-xs text-[#64748B]">
               <span>{formatFileSize(item.file_size)}</span>
               {item.file_hash && (
                 <>
                   <span>•</span>
-                  <span className="font-mono text-[10px] text-cyan-400/80 bg-cyan-950/40 px-1.5 py-0.5 rounded border border-cyan-500/20" title={`SHA256: ${item.file_hash}`}>
+                  <span className="font-mono text-[10px] text-cyan-800 bg-cyan-100 px-1.5 py-0.5 rounded border border-cyan-300" title={`SHA256: ${item.file_hash}`}>
                     SHA: {item.file_hash.substring(0, 10)}…
                   </span>
                 </>
@@ -149,35 +149,35 @@ export default function DatasetsPage() {
         </div>
       )
     },
-    { key: 'file_type', header: 'Type', render: (item: Dataset) => <span className="uppercase text-xs font-mono">{item.file_type}</span> },
-    { key: 'row_count', header: 'Rows', render: (item: Dataset) => item.row_count?.toLocaleString() ?? '—' },
-    { key: 'column_count', header: 'Columns', render: (item: Dataset) => item.column_count ?? '—' },
+    { key: 'file_type', header: 'Type', render: (item: Dataset) => <span className="uppercase text-xs font-mono text-[#0F172A] font-bold">{item.file_type}</span> },
+    { key: 'row_count', header: 'Rows', render: (item: Dataset) => <span className="text-[#0F172A] font-medium">{item.row_count?.toLocaleString() ?? '—'}</span> },
+    { key: 'column_count', header: 'Columns', render: (item: Dataset) => <span className="text-[#0F172A] font-medium">{item.column_count ?? '—'}</span> },
     { key: 'status', header: 'Status', render: (item: Dataset) => <Badge variant={statusColor(item.status)}>{item.status}</Badge> },
     {
       key: 'uploaded_at', header: 'Uploaded Date', sortable: true,
-      render: (item: Dataset) => <span className="text-xs text-gray-300 font-mono">{formatUploadDate(item.uploaded_at)}</span>
+      render: (item: Dataset) => <span className="text-xs text-[#475569] font-mono font-medium">{formatUploadDate(item.uploaded_at)}</span>
     },
     {
       key: 'actions', header: 'Quick Actions',
       render: (item: Dataset) => (
         <div className="flex items-center gap-1.5 justify-end">
           <Link href={`/projects/${projectId}/analysis`}>
-            <button className="px-2.5 py-1 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs font-medium transition-colors">
+            <button className="px-2.5 py-1 rounded-lg bg-cyan-100 hover:bg-cyan-200 border border-cyan-300 text-cyan-900 text-xs font-bold transition-colors">
               Analyze
             </button>
           </Link>
           <Link href={`/projects/${projectId}/cleaning`}>
-            <button className="px-2.5 py-1 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 text-xs font-medium transition-colors">
+            <button className="px-2.5 py-1 rounded-lg bg-purple-100 hover:bg-purple-200 border border-purple-300 text-purple-900 text-xs font-bold transition-colors">
               Clean
             </button>
           </Link>
           <Link href={`/projects/${projectId}/training`}>
-            <button className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-medium transition-colors">
+            <button className="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 text-emerald-900 text-xs font-bold transition-colors">
               Train
             </button>
           </Link>
-          <Button size="sm" variant="ghost" onClick={() => handleDelete(item.id)} title="Delete Dataset">
-            <Trash2 className="w-4 h-4 text-red-400" />
+          <Button size="sm" variant="ghost" onClick={() => handleDelete(item.id)} title="Delete Dataset" className="hover:bg-red-100">
+            <Trash2 className="w-4 h-4 text-red-600" />
           </Button>
         </div>
       )
@@ -185,10 +185,10 @@ export default function DatasetsPage() {
   ];
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in text-[#0F172A]">
       <div>
-        <h1 className="text-3xl font-bold font-heading mb-2">Datasets</h1>
-        <p className="text-gray-400">Upload and manage your project datasets.</p>
+        <h1 className="text-3xl font-bold font-heading mb-2 text-[#0F172A]">Datasets</h1>
+        <p className="text-[#475569]">Upload and manage your project datasets.</p>
       </div>
 
       {datasets.length > 0 && (
@@ -213,18 +213,18 @@ export default function DatasetsPage() {
       )}
 
       {error && (
-        <div className="glass border-red-500/30 bg-red-500/10 p-4 rounded-xl text-red-400">{error}</div>
+        <div className="bg-red-50 border border-red-200 p-4 rounded-xl text-red-800">{error}</div>
       )}
 
       {uploadNotice && (
-        <div className={`glass p-4 rounded-xl border flex items-center justify-between gap-4 ${
+        <div className={`p-4 rounded-xl border flex items-center justify-between gap-4 shadow-sm ${
           uploadNotice.isDuplicate 
-            ? 'border-yellow-500/40 bg-yellow-500/10 text-yellow-300'
-            : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
+            ? 'border-amber-300 bg-amber-50 text-amber-950'
+            : 'border-emerald-300 bg-emerald-50 text-emerald-950'
         }`}>
           <div className="flex items-center gap-3">
-            <span className={`w-2.5 h-2.5 rounded-full ${uploadNotice.isDuplicate ? 'bg-yellow-400 animate-pulse' : 'bg-emerald-400'}`} />
-            <span className="text-sm font-medium">{uploadNotice.message}</span>
+            <span className={`w-2.5 h-2.5 rounded-full ${uploadNotice.isDuplicate ? 'bg-amber-500 animate-pulse' : 'bg-emerald-600'}`} />
+            <span className="text-sm font-semibold">{uploadNotice.message}</span>
           </div>
           <button 
             onClick={() => setUploadNotice(null)}
@@ -235,10 +235,10 @@ export default function DatasetsPage() {
         </div>
       )}
 
-      <Card glow>
-        <CardHeader>
-          <h3 className="font-bold flex items-center gap-2">
-            <Upload className="w-5 h-5 text-purple-400" /> Upload Dataset
+      <Card className="bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm">
+        <CardHeader className="border-b border-[#E2DCD0]">
+          <h3 className="font-bold flex items-center gap-2 text-[#0F172A]">
+            <Upload className="w-5 h-5 text-purple-700" /> Upload Dataset
           </h3>
         </CardHeader>
         <CardBody>
@@ -251,23 +251,23 @@ export default function DatasetsPage() {
         </CardBody>
       </Card>
 
-      <Card>
-        <CardHeader>
+      <Card className="bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm">
+        <CardHeader className="border-b border-[#E2DCD0]">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold flex items-center gap-2">
-              <Database className="w-5 h-5 text-cyan-400" /> Dataset Files
+            <h3 className="font-bold flex items-center gap-2 text-[#0F172A]">
+              <Database className="w-5 h-5 text-cyan-700" /> Dataset Files
             </h3>
-            <span className="text-sm text-gray-400">{datasets.length} file{datasets.length !== 1 ? 's' : ''}</span>
+            <span className="text-sm text-[#475569] font-medium">{datasets.length} file{datasets.length !== 1 ? 's' : ''}</span>
           </div>
         </CardHeader>
         {datasets.length > 0 ? (
           <DataTable data={datasets} columns={columns} />
         ) : (
           <CardBody>
-            <div className="text-center py-12 text-gray-500">
-              <Database className="w-12 h-12 mx-auto mb-4 text-gray-600" />
-              <p className="text-lg">No datasets uploaded yet</p>
-              <p className="text-sm mt-1">Upload a CSV, Excel, or JSON file to get started</p>
+            <div className="text-center py-12 text-[#64748B]">
+              <Database className="w-12 h-12 mx-auto mb-4 text-[#94A3B8]" />
+              <p className="text-lg font-semibold text-[#0F172A]">No datasets uploaded yet</p>
+              <p className="text-sm mt-1 text-[#475569]">Upload a CSV, Excel, or JSON file to get started</p>
             </div>
           </CardBody>
         )}

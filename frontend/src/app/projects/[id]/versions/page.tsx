@@ -1,11 +1,11 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { 
-  GitBranch, History, RotateCcw, Database, Wand2, Cpu, FileCode2, 
-  CheckCircle2, ShieldCheck, ArrowRight, Clock, Layers, Sparkles, 
-  ExternalLink, AlertCircle, RefreshCw, FileCode, Check, ChevronRight
+  GitBranch, Database, Wand2, Cpu, FileCode2, 
+  CheckCircle2, ShieldCheck, ArrowRight, Clock, Layers,
+  AlertCircle, RefreshCw, FileCode, Check, RotateCcw
 } from 'lucide-react';
-import { Card, CardBody, CardHeader } from '@/components/ui/Card';
+import { Card, CardBody } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { api } from '@/lib/api';
@@ -64,7 +64,7 @@ interface VersionChain {
 
 export default function VersionHistoryPage() {
   const params = useParams();
-  const projectId = params.id as string;
+  const projectId = (params?.id as string) || 'p-101';
   const [loading, setLoading] = useState(true);
   const [historyData, setHistoryData] = useState<any | null>(null);
   const [hasDatasets, setHasDatasets] = useState(true);
@@ -73,9 +73,18 @@ export default function VersionHistoryPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [rollingBackVersion, setRollingBackVersion] = useState<number | null>(null);
 
-  useEffect(() => {
-    checkDatasetsAndLoad();
-  }, [projectId]);
+  const loadVersionHistory = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await api.versionLineage.getHistory(projectId);
+      setHistoryData(data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load version history');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const checkDatasetsAndLoad = async () => {
     try {
@@ -92,18 +101,9 @@ export default function VersionHistoryPage() {
     }
   };
 
-  const loadVersionHistory = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await api.versionLineage.getHistory(projectId);
-      setHistoryData(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load version history');
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    checkDatasetsAndLoad();
+  }, [projectId]);
 
   if (!initialLoading && !hasDatasets) {
     return <NoDatasetGate projectId={projectId} pageName="Version History & Lineage" pageDescription="End-to-end audit trail connecting Dataset → Recipe → Model → API Endpoint." />;
@@ -132,22 +132,22 @@ export default function VersionHistoryPage() {
   const activeChain = historyData?.chains?.find((c: VersionChain) => c.is_active);
 
   return (
-    <div className="space-y-8 animate-fade-in pb-12">
+    <div className="space-y-8 animate-fade-in pb-12 text-[#0f172a]">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#FFFDF9] p-7 rounded-3xl border border-[#E2DCD0] shadow-sm">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-md text-[11px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="px-2.5 py-0.5 rounded-md text-[11px] font-mono font-bold bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]">
               Centralized Provenance
             </span>
-            <span className="text-gray-400 text-xs">•</span>
-            <span className="text-gray-400 text-xs font-mono">{historyData?.total_versions || 0} Versions Logged</span>
+            <span className="text-[#64748b] text-xs">•</span>
+            <span className="text-[#475569] text-xs font-mono font-bold">{historyData?.total_versions || 0} Versions Logged</span>
           </div>
-          <h1 className="text-3xl font-bold font-heading text-white flex items-center gap-2.5">
-            <GitBranch className="w-8 h-8 text-purple-400" /> Version History & Lineage
+          <h1 className="text-3xl font-extrabold font-heading text-[#0f172a] flex items-center gap-2.5">
+            <GitBranch className="w-8 h-8 text-[#0f172a]" /> Version History & Lineage
           </h1>
-          <p className="text-gray-400 text-sm mt-1">
-            End-to-end audit trail connecting Dataset → Recipe → Model → API Endpoint with instantaneous one-action rollback.
+          <p className="text-[#475569] text-sm mt-1">
+            End-to-end audit trail connecting Dataset → Recipe → Model → API Endpoint with instantaneous rollback.
           </p>
         </div>
         <Button 
@@ -162,48 +162,48 @@ export default function VersionHistoryPage() {
 
       {/* Notifications */}
       {error && (
-        <div className="glass border-red-500/30 bg-red-500/10 p-4 rounded-xl text-red-400 flex items-center gap-3 text-sm">
-          <AlertCircle className="w-5 h-5 shrink-0" />
+        <div className="border border-rose-300 bg-rose-50 p-4 rounded-2xl text-rose-900 flex items-center gap-3 text-sm font-semibold">
+          <AlertCircle className="w-5 h-5 shrink-0 text-rose-700" />
           <span>{error}</span>
         </div>
       )}
 
       {successMessage && (
-        <div className="glass border-emerald-500/40 bg-emerald-500/10 p-4 rounded-xl text-emerald-300 flex items-center gap-3 text-sm shadow-lg shadow-emerald-950/30 animate-fade-in">
-          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-          <span className="font-medium">{successMessage}</span>
+        <div className="border border-emerald-300 bg-emerald-50 p-4 rounded-2xl text-emerald-950 flex items-center gap-3 text-sm shadow-sm animate-fade-in font-semibold">
+          <CheckCircle2 className="w-5 h-5 text-emerald-700 shrink-0" />
+          <span>{successMessage}</span>
         </div>
       )}
 
       {/* Active Production Summary Banner */}
       {activeChain && (
-        <Card className="border border-cyan-500/40 bg-gradient-to-r from-cyan-950/30 via-[#0d1527] to-purple-950/30 shadow-xl">
+        <Card className="border border-[#E2DCD0] bg-[#FFFDF9] shadow-sm">
           <CardBody>
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div className="flex items-start gap-4">
-                <div className="p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-2xl text-cyan-400 shrink-0">
+                <div className="p-3 bg-[#FEF3C7] border border-[#FDE68A] rounded-2xl text-[#92400E] shrink-0">
                   <ShieldCheck className="w-7 h-7" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2.5">
-                    <span className="font-bold text-white text-base">Active Production Version</span>
-                    <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-green-500/20 text-green-300 border border-green-500/40 flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                    <span className="font-extrabold text-[#0f172a] text-lg">Active Production Version</span>
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-950 border border-emerald-300 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
                       Live (v{activeChain.version})
                     </span>
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-[#475569] mt-1 font-medium">
                     Currently serving live inference requests and powering generated Docker APIs.
                   </p>
-                  <div className="flex flex-wrap items-center gap-3 mt-3 text-xs font-mono">
-                    <span className="px-2 py-1 rounded bg-white/5 border border-white/10 text-cyan-300">
+                  <div className="flex flex-wrap items-center gap-2 mt-3 text-xs font-mono">
+                    <span className="px-2.5 py-1 rounded-md bg-[#FAF7F0] border border-[#E2DCD0] text-[#0f172a] font-bold">
                       Model: {activeChain.model?.algorithm || 'Ensemble'}
                     </span>
-                    <span className="px-2 py-1 rounded bg-white/5 border border-white/10 text-purple-300">
+                    <span className="px-2.5 py-1 rounded-md bg-[#FAF7F0] border border-[#E2DCD0] text-indigo-900 font-bold">
                       Data: {activeChain.dataset?.filename || 'dataset.csv'} (v{activeChain.dataset?.version || 1})
                     </span>
                     {activeChain.model?.metrics?.accuracy && (
-                      <span className="px-2 py-1 rounded bg-white/5 border border-white/10 text-emerald-300 font-bold">
+                      <span className="px-2.5 py-1 rounded-md bg-emerald-100 border border-emerald-300 text-emerald-950 font-bold">
                         Accuracy: {(activeChain.model.metrics.accuracy * 100).toFixed(1)}%
                       </span>
                     )}
@@ -214,16 +214,16 @@ export default function VersionHistoryPage() {
               <div className="flex items-center gap-3 self-end lg:self-center">
                 <Link
                   href={`/projects/${projectId}/training`}
-                  className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-gray-300 hover:text-white transition-all flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-xl bg-[#FAF7F0] hover:bg-[#EFEBE0] border border-[#E2DCD0] text-xs font-bold text-[#0f172a] transition-all flex items-center gap-1.5"
                 >
-                  <Cpu className="w-3.5 h-3.5 text-purple-400" />
+                  <Cpu className="w-3.5 h-3.5 text-[#0f172a]" />
                   <span>Leaderboard</span>
                 </Link>
                 <Link
                   href={`/projects/${projectId}/api-gen`}
-                  className="px-3.5 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-xs font-semibold text-cyan-200 transition-all flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-xl bg-[#0F172A] hover:bg-[#1E293B] text-xs font-bold text-white transition-all flex items-center gap-1.5 shadow-sm"
                 >
-                  <FileCode2 className="w-3.5 h-3.5 text-cyan-300" />
+                  <FileCode2 className="w-3.5 h-3.5 text-amber-400" />
                   <span>Inspect API</span>
                 </Link>
               </div>
@@ -234,14 +234,14 @@ export default function VersionHistoryPage() {
 
       {/* Linked Multi-Layer Version Chains */}
       <div className="space-y-6">
-        <h3 className="text-lg font-bold text-white flex items-center gap-2">
-          <Layers className="w-5 h-5 text-cyan-400" /> Full Lineage Provenance Chains
+        <h3 className="text-xl font-bold text-[#0f172a] flex items-center gap-2">
+          <Layers className="w-5 h-5 text-indigo-700" /> Full Lineage Provenance Chains
         </h3>
 
         {loading && !historyData ? (
-          <div className="py-12 text-center text-gray-400">
-            <div className="w-8 h-8 border-2 border-purple-500/30 border-t-purple-400 rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-sm font-medium">Reconstructing artifact lineage graph...</p>
+          <div className="py-12 text-center text-[#64748b]">
+            <div className="w-8 h-8 border-2 border-[#0f172a]/20 border-t-[#0f172a] rounded-full animate-spin mx-auto mb-3" />
+            <p className="text-sm font-semibold">Reconstructing artifact lineage graph...</p>
           </div>
         ) : historyData?.chains?.length > 0 ? (
           <div className="space-y-6">
@@ -250,25 +250,25 @@ export default function VersionHistoryPage() {
               return (
                 <div
                   key={chain.version}
-                  className={`rounded-2xl border transition-all overflow-hidden ${
+                  className={`rounded-3xl border transition-all overflow-hidden shadow-sm ${
                     isCurrent
-                      ? 'bg-[#0f172a]/90 border-purple-500/50 shadow-2xl shadow-purple-950/30 ring-1 ring-purple-500/30'
-                      : 'bg-[#0b1220]/70 border-white/10 hover:border-white/20'
+                      ? 'bg-[#FFFDF9] border-[#0f172a] ring-2 ring-[#0f172a]/10'
+                      : 'bg-[#FFFDF9] border-[#E2DCD0]'
                   }`}
                 >
                   {/* Chain Header */}
-                  <div className={`p-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                  <div className={`p-5 border-b border-[#E2DCD0] flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                     isCurrent 
-                      ? 'bg-gradient-to-r from-purple-900/30 via-slate-900 to-cyan-900/30 border-purple-500/30' 
-                      : 'bg-white/[0.02] border-white/10'
+                      ? 'bg-[#FEF3C7]/40' 
+                      : 'bg-[#FAF7F0]'
                   }`}>
                     <div className="flex items-center gap-3">
-                      <span className="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-300 font-mono font-bold flex items-center justify-center text-sm shadow-md">
+                      <span className="w-9 h-9 rounded-xl bg-[#0F172A] text-white font-mono font-bold flex items-center justify-center text-sm shadow-sm">
                         v{chain.version}
                       </span>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-white text-base">
+                          <h4 className="font-extrabold text-[#0f172a] text-base">
                             Pipeline Chain Version {chain.version}
                           </h4>
                           {isCurrent ? (
@@ -278,8 +278,8 @@ export default function VersionHistoryPage() {
                           )}
                         </div>
                         {chain.created_at && (
-                          <p className="text-[11px] text-gray-400 font-mono flex items-center gap-1 mt-0.5">
-                            <Clock className="w-3 h-3 text-gray-500" />
+                          <p className="text-xs text-[#64748b] font-medium flex items-center gap-1 mt-0.5">
+                            <Clock className="w-3.5 h-3.5 text-[#94a3b8]" />
                             Created: {new Date(chain.created_at).toLocaleString()}
                           </p>
                         )}
@@ -289,8 +289,8 @@ export default function VersionHistoryPage() {
                     {/* Rollback Action Button */}
                     <div>
                       {isCurrent ? (
-                        <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/30">
-                          <CheckCircle2 className="w-4 h-4" />
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-950 bg-emerald-100 px-3.5 py-1.5 rounded-xl border border-emerald-300">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-700" />
                           <span>Currently Active</span>
                         </div>
                       ) : (
@@ -299,152 +299,96 @@ export default function VersionHistoryPage() {
                           variant="secondary"
                           disabled={rollingBackVersion === chain.version}
                           onClick={() => handleRollback(chain.version, chain.model?.id)}
-                          className="flex items-center gap-1.5 text-xs bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 text-purple-200 hover:text-white shadow-md transition-all"
+                          className="flex items-center gap-1.5 font-bold text-xs"
                         >
-                          <RotateCcw className={`w-3.5 h-3.5 text-purple-300 ${rollingBackVersion === chain.version ? 'animate-spin' : ''}`} />
-                          <span>{rollingBackVersion === chain.version ? 'Rolling back...' : `Rollback to v${chain.version}`}</span>
+                          <RotateCcw className={`w-3.5 h-3.5 ${rollingBackVersion === chain.version ? 'animate-spin' : ''}`} />
+                          <span>Rollback to v{chain.version}</span>
                         </Button>
                       )}
                     </div>
                   </div>
 
-                  {/* 4-Layer Lineage Chain Grid */}
-                  <div className="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
-                    {/* Layer 1: Dataset */}
-                    <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-3">
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] uppercase font-bold text-cyan-400 flex items-center gap-1.5">
-                            <Database className="w-3.5 h-3.5" /> 1. Dataset Layer
-                          </span>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                            v{chain.dataset?.version || chain.version}
-                          </span>
-                        </div>
-                        <p className="font-semibold text-white truncate text-xs" title={chain.dataset?.filename}>
-                          {chain.dataset?.filename || 'dataset.csv'}
-                        </p>
-                        <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
-                            {(chain.dataset as any)?.status === 'features_engineered' || chain.dataset?.filename?.includes('_features')
-                              ? '⚡ Features Snapshot'
-                              : (chain.dataset as any)?.status === 'cleaned' || chain.dataset?.filename?.includes('_cleaned')
-                              ? '🧹 Cleaned Snapshot'
-                              : '📊 Raw Analyzed'}
-                          </span>
-                        </div>
-                        <div className="text-gray-400 space-y-1 mt-2 text-[11px]">
-                          <div>Rows: <span className="text-gray-200">{chain.dataset?.row_count?.toLocaleString() || '—'}</span></div>
-                          <div>Cols: <span className="text-gray-200">{chain.dataset?.column_count || '—'}</span></div>
-                          {chain.dataset?.file_hash && (
-                            <div className="truncate text-[10px] text-cyan-400/80" title={chain.dataset.file_hash}>
-                              Hash: {chain.dataset.file_hash.substring(0, 10)}…
-                            </div>
-                          )}
-                        </div>
+                  {/* 4 Pipeline Artifact Pillars */}
+                  <div className="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* Dataset */}
+                    <div className="p-4 rounded-2xl bg-[#FAF7F0] border border-[#E2DCD0] space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-[#475569] flex items-center gap-1">
+                          <Database className="w-3.5 h-3.5 text-blue-700" /> Dataset
+                        </span>
+                        <span className="text-xs font-mono font-bold text-indigo-900 bg-indigo-100 px-2 py-0.5 rounded">
+                          v{chain.dataset?.version || 1}
+                        </span>
                       </div>
-                      <Link 
-                        href={`/projects/${projectId}/datasets`}
-                        className="text-[11px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1 pt-1 border-t border-white/5"
-                      >
-                        <span>Inspect Data</span>
-                        <ChevronRight className="w-3 h-3" />
-                      </Link>
+                      <div className="font-bold text-sm text-[#0f172a] truncate" title={chain.dataset?.filename}>
+                        {chain.dataset?.filename || 'dataset.csv'}
+                      </div>
+                      <div className="text-xs text-[#475569] space-y-0.5 font-medium">
+                        <div>Rows: <strong className="text-[#0f172a]">{chain.dataset?.row_count?.toLocaleString() || 'N/A'}</strong></div>
+                        <div>Cols: <strong className="text-[#0f172a]">{chain.dataset?.column_count || 'N/A'}</strong></div>
+                      </div>
                     </div>
 
-                    {/* Layer 2: Preprocessing & Recipe */}
-                    <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-3">
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] uppercase font-bold text-purple-400 flex items-center gap-1.5">
-                            <Wand2 className="w-3.5 h-3.5" /> 2. Recipe & Config
-                          </span>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                            recipe_v{chain.version}
-                          </span>
-                        </div>
-                        <p className="font-semibold text-white text-xs">
-                          {chain.recipe?.applied_steps_count || 0} Clean Step(s) Applied
-                        </p>
-                        <div className="text-gray-400 space-y-1 mt-2 text-[11px]">
-                          <div>Features: <span className="text-gray-200">{chain.recipe?.features_count || 'Auto'}</span></div>
-                          <div>Validation: <span className="text-gray-200">{chain.recipe?.cv_folds || 5}-Fold Stratified</span></div>
-                          <div>Split: <span className="text-gray-200">{chain.recipe?.test_size ? `${(chain.recipe.test_size * 100).toFixed(0)}% Holdout` : '20% Holdout'}</span></div>
-                        </div>
+                    {/* Cleaning */}
+                    <div className="p-4 rounded-2xl bg-[#FAF7F0] border border-[#E2DCD0] space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-[#475569] flex items-center gap-1">
+                          <Wand2 className="w-3.5 h-3.5 text-amber-700" /> Cleaning
+                        </span>
+                        <span className="text-xs font-mono font-bold text-amber-950 bg-amber-100 px-2 py-0.5 rounded">
+                          {chain.cleaning?.steps_applied?.length || 0} Steps
+                        </span>
                       </div>
-                      <Link 
-                        href={`/projects/${projectId}/cleaning`}
-                        className="text-[11px] text-purple-400 hover:text-purple-300 flex items-center gap-1 pt-1 border-t border-white/5"
-                      >
-                        <span>Cleaning Recipe</span>
-                        <ChevronRight className="w-3 h-3" />
-                      </Link>
+                      <div className="font-bold text-sm text-[#0f172a]">
+                        {chain.cleaning?.steps_applied?.length ? 'Cleaned Dataset' : 'Raw Clean Pass'}
+                      </div>
+                      <div className="text-xs text-[#475569] space-y-0.5 font-medium">
+                        <div>Before: <strong className="text-[#0f172a]">{chain.cleaning?.rows_before?.toLocaleString() || 'N/A'}</strong> rows</div>
+                        <div>After: <strong className="text-[#0f172a]">{chain.cleaning?.rows_after?.toLocaleString() || 'N/A'}</strong> rows</div>
+                      </div>
                     </div>
 
-                    {/* Layer 3: Model */}
-                    <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-3">
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] uppercase font-bold text-emerald-400 flex items-center gap-1.5">
-                            <Cpu className="w-3.5 h-3.5" /> 3. Model Weights
-                          </span>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                            v{chain.model?.version || chain.version}
-                          </span>
-                        </div>
-                        <p className="font-semibold text-white text-xs">
-                          {chain.model?.algorithm || 'Top Candidate'}
-                        </p>
-                        <div className="text-gray-400 space-y-1 mt-2 text-[11px]">
-                          {chain.model?.metrics?.accuracy != null && (
-                            <div>Acc: <span className="text-green-400 font-bold">{(chain.model.metrics.accuracy * 100).toFixed(1)}%</span></div>
-                          )}
-                          {chain.model?.metrics?.f1 != null && (
-                            <div>F1: <span className="text-purple-300">{chain.model.metrics.f1.toFixed(3)}</span></div>
-                          )}
-                          <div>Candidates: <span className="text-gray-200">{chain.model?.total_candidates || 1} evaluated</span></div>
-                        </div>
+                    {/* Model */}
+                    <div className="p-4 rounded-2xl bg-[#FAF7F0] border border-[#E2DCD0] space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-[#475569] flex items-center gap-1">
+                          <Cpu className="w-3.5 h-3.5 text-emerald-700" /> Trained Model
+                        </span>
+                        <span className="text-xs font-mono font-bold text-emerald-950 bg-emerald-100 px-2 py-0.5 rounded">
+                          v{chain.model?.version || 1}
+                        </span>
                       </div>
-                      <Link 
-                        href={`/projects/${projectId}/training`}
-                        className="text-[11px] text-emerald-400 hover:text-emerald-300 flex items-center gap-1 pt-1 border-t border-white/5"
-                      >
-                        <span>View Model</span>
-                        <ChevronRight className="w-3 h-3" />
-                      </Link>
+                      <div className="font-bold text-sm text-[#0f172a] truncate">
+                        {chain.model?.algorithm || 'AutoML Winner'}
+                      </div>
+                      <div className="text-xs text-[#475569] space-y-0.5 font-medium">
+                        {chain.model?.metrics?.accuracy && (
+                          <div>Acc: <strong className="text-emerald-800">{(chain.model.metrics.accuracy * 100).toFixed(1)}%</strong></div>
+                        )}
+                        {chain.model?.metrics?.r2 && (
+                          <div>R²: <strong className="text-emerald-800">{chain.model.metrics.r2.toFixed(3)}</strong></div>
+                        )}
+                        <div>Time: <strong className="text-[#0f172a]">{chain.model?.training_time_seconds ? `${chain.model.training_time_seconds.toFixed(1)}s` : 'N/A'}</strong></div>
+                      </div>
                     </div>
 
-                    {/* Layer 4: API Endpoint */}
-                    <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 flex flex-col justify-between space-y-3">
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] uppercase font-bold text-yellow-400 flex items-center gap-1.5">
-                            <FileCode2 className="w-3.5 h-3.5" /> 4. Deployed API
-                          </span>
-                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                            isCurrent 
-                              ? 'bg-green-500/20 text-green-300 border border-green-500/30' 
-                              : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
-                          }`}>
-                            {chain.api?.status || (isCurrent ? 'active' : 'standby')}
-                          </span>
-                        </div>
-                        <p className="font-semibold text-white text-xs truncate">
-                          {chain.api?.endpoint || `/predict (v${chain.version})`}
-                        </p>
-                        <div className="text-gray-400 space-y-1 mt-2 text-[11px]">
-                          <div>Framework: <span className="text-gray-200">FastAPI</span></div>
-                          <div>Docker: <span className="text-cyan-300 font-bold">Enabled</span></div>
-                          <div>Rollback: <span className="text-purple-300">Ready</span></div>
-                        </div>
+                    {/* API Endpoint */}
+                    <div className="p-4 rounded-2xl bg-[#FAF7F0] border border-[#E2DCD0] space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-[#475569] flex items-center gap-1">
+                          <FileCode2 className="w-3.5 h-3.5 text-indigo-700" /> Exported API
+                        </span>
+                        <span className="text-xs font-mono font-bold text-indigo-950 bg-indigo-100 px-2 py-0.5 rounded">
+                          {chain.api?.framework || 'FastAPI'}
+                        </span>
                       </div>
-                      <Link 
-                        href={`/projects/${projectId}/api-gen`}
-                        className="text-[11px] text-yellow-400 hover:text-yellow-300 flex items-center gap-1 pt-1 border-t border-white/5"
-                      >
-                        <span>API Specs</span>
-                        <ChevronRight className="w-3 h-3" />
-                      </Link>
+                      <div className="font-bold text-xs text-[#0f172a] font-mono truncate">
+                        {chain.api?.endpoint || '/api/predict'}
+                      </div>
+                      <div className="text-xs text-[#475569] space-y-0.5 font-medium">
+                        <div>Docker: <strong className="text-[#0f172a]">{chain.api?.has_dockerfile ? 'Packaged' : 'Ready'}</strong></div>
+                        <div>Status: <strong className="text-emerald-800 font-bold">{chain.api?.status || 'Active'}</strong></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -452,17 +396,11 @@ export default function VersionHistoryPage() {
             })}
           </div>
         ) : (
-          <Card>
-            <CardBody>
-              <div className="text-center py-12 text-gray-500">
-                <GitBranch className="w-12 h-12 mx-auto mb-4 text-purple-400" />
-                <p className="text-lg text-white font-medium">No Provenance Chains Found</p>
-                <p className="text-sm mt-1 text-gray-400">
-                  Upload a dataset and execute AutoML training to generate the first version chain.
-                </p>
-              </div>
-            </CardBody>
-          </Card>
+          <div className="p-12 text-center bg-[#FFFDF9] border border-[#E2DCD0] rounded-3xl text-[#475569]">
+            <GitBranch className="w-12 h-12 text-[#94a3b8] mx-auto mb-3" />
+            <h4 className="text-base font-bold text-[#0f172a]">No Lineage History Recorded Yet</h4>
+            <p className="text-xs text-[#64748b] mt-1">Train a model or apply transformations to generate your first version chain.</p>
+          </div>
         )}
       </div>
     </div>

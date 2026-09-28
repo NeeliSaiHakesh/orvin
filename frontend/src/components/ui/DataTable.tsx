@@ -42,32 +42,32 @@ export function DataTable<T>({ columns, data, itemsPerPage = 10 }: DataTableProp
   const paginatedData = sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="w-full">
+    <div className="w-full bg-[#FFFDF9] border border-[#E2DCD0] rounded-2xl overflow-hidden shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-white/5 border-b border-white/10 text-gray-300 text-sm">
+            <tr className="bg-[#FAF7F0] border-b border-[#E2DCD0] text-[#0f172a] text-xs font-bold uppercase tracking-wider">
               {columns.map(col => (
                 <th 
                   key={String(col.key)} 
-                  className={`p-4 font-medium ${col.sortable ? 'cursor-pointer hover:bg-white/5 transition-colors' : ''}`}
+                  className={`p-4 font-bold text-[#0f172a] ${col.sortable ? 'cursor-pointer hover:bg-[#EFEBE0] transition-colors' : ''}`}
                   onClick={() => col.sortable && handleSort(String(col.key))}
                 >
                   <div className="flex items-center gap-2">
-                    {col.header}
+                    <span className="font-extrabold text-[#0f172a]">{col.header}</span>
                     {col.sortable && sortKey === col.key && (
-                      sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
+                      sortDirection === 'asc' ? <ChevronUp className="w-4 h-4 text-[#0f172a]" /> : <ChevronDown className="w-4 h-4 text-[#0f172a]" />
                     )}
                   </div>
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-[#E2DCD0]">
             {paginatedData.map((item, i) => (
-              <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
+              <tr key={i} className="hover:bg-[#FAF7F0] transition-colors text-[#0f172a]">
                 {columns.map(col => (
-                  <td key={String(col.key)} className="p-4 text-sm">
+                  <td key={String(col.key)} className="p-4 text-sm font-medium text-[#0f172a]">
                     {col.render ? col.render(item, i) : (item as any)[col.key]}
                   </td>
                 ))}
@@ -75,7 +75,7 @@ export function DataTable<T>({ columns, data, itemsPerPage = 10 }: DataTableProp
             ))}
             {paginatedData.length === 0 && (
               <tr>
-                <td colSpan={columns.length} className="p-8 text-center text-gray-500">
+                <td colSpan={columns.length} className="p-8 text-center text-[#64748b] font-medium text-sm">
                   No data available.
                 </td>
               </tr>
@@ -85,22 +85,22 @@ export function DataTable<T>({ columns, data, itemsPerPage = 10 }: DataTableProp
       </div>
       
       {totalPages > 1 && (
-        <div className="flex items-center justify-between p-4 border-t border-white/10">
-          <span className="text-sm text-gray-400">
+        <div className="flex items-center justify-between p-4 border-t border-[#E2DCD0] bg-[#FAF7F0]">
+          <span className="text-xs font-semibold text-[#475569]">
             Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, data.length)} of {data.length} results
           </span>
           <div className="flex gap-2">
             <button 
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-50 transition-colors"
+              className="p-2 rounded-lg bg-[#FFFDF9] border border-[#E2DCD0] hover:bg-[#EFEBE0] text-[#0f172a] disabled:opacity-40 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button 
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-50 transition-colors"
+              className="p-2 rounded-lg bg-[#FFFDF9] border border-[#E2DCD0] hover:bg-[#EFEBE0] text-[#0f172a] disabled:opacity-40 transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

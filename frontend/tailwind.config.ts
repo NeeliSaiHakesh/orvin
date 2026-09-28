@@ -11,14 +11,14 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#0a0a1a",
-        card: "rgba(255, 255, 255, 0.05)",
-        primary: "#8B5CF6",
-        accent: "#22D3EE",
+        background: "#FAF7F2",
+        card: "#FFFDF9",
+        primary: "#0F172A",
+        accent: "#2563EB",
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "sans-serif"],
-        heading: ["var(--font-outfit)", "sans-serif"],
+        sans: ["Segoe UI", "Inter", "-apple-system", "BlinkMacSystemFont", "Roboto", "sans-serif"],
+        heading: ["Segoe UI", "Outfit", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
       },
     },
   },

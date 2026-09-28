@@ -146,17 +146,17 @@ export default function CleaningPage() {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in text-[#0F172A]">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold font-heading mb-2">AI Data Cleaning</h1>
-          <p className="text-gray-400">Review, customize, and apply AI-suggested cleaning steps per dataset.</p>
+          <h1 className="text-3xl font-bold font-heading mb-2 text-[#0F172A]">AI Data Cleaning</h1>
+          <p className="text-[#475569]">Review, customize, and apply AI-suggested cleaning steps per dataset.</p>
         </div>
-        <Button onClick={applyCleaning} disabled={applying || loading} className="flex items-center gap-2">
+        <Button onClick={applyCleaning} disabled={applying || loading} className="flex items-center gap-2 bg-[#0F172A] hover:bg-[#1E293B] text-white">
           {applying ? (
             <><Loader2 className="w-4 h-4 animate-spin" /> Applying...</>
           ) : (
-            <><Wand2 className="w-4 h-4" /> Apply Cleaning Pipeline</>
+            <><Wand2 className="w-4 h-4 text-amber-400" /> Apply Cleaning Pipeline</>
           )}
         </Button>
       </div>
@@ -170,19 +170,19 @@ export default function CleaningPage() {
       />
 
       {error && (
-        <div className="glass border-red-500/30 bg-red-500/10 p-4 rounded-xl text-red-400">{error}</div>
+        <div className="bg-red-50 border border-red-200 p-4 rounded-xl text-red-800">{error}</div>
       )}
 
       {applied && (
-        <div className="glass border-green-500/30 bg-green-500/10 p-4 rounded-xl text-green-400 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+        <div className="border border-emerald-300 bg-emerald-50 p-4 rounded-xl text-emerald-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm font-semibold">
           <div className="flex items-center gap-2">
-            <span className="font-bold">✓ Success:</span>
+            <span className="font-bold text-emerald-800">✓ Success:</span>
             <span>{newVersionNotice || "Cleaned dataset snapshot generated! Original raw dataset v1 preserved."}</span>
           </div>
           <div className="flex items-center gap-2">
             <Link 
               href={`/projects/${projectId}/features`}
-              className="px-3 py-1.5 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-300 text-xs font-semibold flex items-center gap-1 transition-colors"
+              className="px-3.5 py-1.5 rounded-lg bg-[#0F172A] hover:bg-[#1E293B] text-white text-xs font-bold flex items-center gap-1 transition-colors"
             >
               <span>Next: Feature Engineering</span>
               <ArrowRight className="w-3 h-3" />
@@ -193,10 +193,10 @@ export default function CleaningPage() {
       )}
 
       {loading ? (
-        <Card>
+        <Card className="bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm">
           <CardBody className="text-center py-16">
-            <Loader2 className="w-12 h-12 mx-auto mb-4 text-purple-400 animate-spin" />
-            <p className="text-gray-400">Analyzing dataset for cleaning suggestions...</p>
+            <Loader2 className="w-12 h-12 mx-auto mb-4 text-purple-700 animate-spin" />
+            <p className="text-[#475569]">Analyzing dataset for cleaning suggestions...</p>
           </CardBody>
         </Card>
       ) : (
@@ -204,21 +204,21 @@ export default function CleaningPage() {
           {suggestions.map((s, i) => {
             const isApproved = approvedSteps[s.step_name] !== false;
             return (
-              <Card key={i} hover className={`transition-all ${isApproved ? 'border-purple-500/30 bg-white/5' : 'opacity-60 bg-white/2'}`}>
+              <Card key={i} hover className={`transition-all bg-[#FFFDF9] shadow-sm ${isApproved ? 'border-purple-300' : 'border-[#E2DCD0] opacity-75'}`}>
                 <CardBody className="flex items-center justify-between">
                   <div className="flex-1 pr-6">
                     <div className="flex items-center gap-3 mb-1">
-                      <span className="text-xs font-bold uppercase tracking-wider text-purple-400">{s.step_name}</span>
+                      <span className="text-xs font-bold uppercase tracking-wider text-purple-900 bg-purple-100 px-2 py-0.5 rounded border border-purple-200">{s.step_name}</span>
                       {s.affected_columns && (
                         <div className="flex gap-1">
                           {s.affected_columns.slice(0, 3).map((col, cIdx) => (
-                            <span key={cIdx} className="px-2 py-0.5 bg-white/10 rounded text-xs text-gray-300 font-mono">{col}</span>
+                            <span key={cIdx} className="px-2 py-0.5 bg-[#FAF7F2] border border-[#E2DCD0] rounded text-xs text-[#0F172A] font-mono font-medium">{col}</span>
                           ))}
                         </div>
                       )}
                     </div>
-                    <p className="text-sm font-medium text-white mb-1">{s.description}</p>
-                    <p className="text-xs text-gray-400">{s.impact}</p>
+                    <p className="text-sm font-semibold text-[#0F172A] mb-1">{s.description}</p>
+                    <p className="text-xs text-[#475569]">{s.impact}</p>
                   </div>
                   <div className="flex gap-2 shrink-0">
                     <Button

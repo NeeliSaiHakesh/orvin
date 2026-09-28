@@ -1,14 +1,12 @@
 "use client";
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { 
-  Sliders, Zap, RefreshCw, RotateCcw, TrendingUp, 
-  Layers, DollarSign, Clock, ShieldCheck, AlertCircle, 
-  Cpu, ArrowRight, Dna, Play, Sparkles
+  Sliders, RotateCcw, TrendingUp, 
+  Cpu, AlertCircle, Sparkles
 } from 'lucide-react';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import { DatasetSelector } from '@/components/ui/DatasetSelector';
 import { Plot } from '@/components/ui/Plot';
 import { NoDatasetGate } from '@/components/ui/NoDatasetGate';
@@ -201,7 +199,7 @@ export default function SimulatorPage() {
       grouped[pt.feature_name].y.push(pt.predicted_probability * 100);
     });
 
-    const colors = ['#06B6D4', '#8B5CF6', '#10B981', '#F59E0B'];
+    const colors = ['#2563EB', '#7C3AED', '#059669', '#D97706'];
     return Object.entries(grouped).map(([name, data], idx) => ({
       x: data.x,
       y: data.y,
@@ -214,28 +212,28 @@ export default function SimulatorPage() {
   };
 
   const plotLayout = {
-    paper_bgcolor: 'transparent',
-    plot_bgcolor: 'transparent',
-    font: { color: '#F9FAFB', size: 11 },
-    xaxis: { title: 'Perturbation Shift (%)', gridcolor: '#1f293d', zerolinecolor: '#374151' },
-    yaxis: { title: 'Predicted Probability (%)', gridcolor: '#1f293d' },
+    paper_bgcolor: '#FFFDF9',
+    plot_bgcolor: '#FFFDF9',
+    font: { color: '#0F172A', size: 11, family: 'inherit' },
+    xaxis: { title: 'Perturbation Shift (%)', gridcolor: '#E2DCD0', zerolinecolor: '#CBD5E1' },
+    yaxis: { title: 'Predicted Probability (%)', gridcolor: '#E2DCD0' },
     margin: { t: 20, b: 40, l: 50, r: 20 },
     legend: { orientation: 'h' as const, y: -0.2 }
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in text-[#0F172A]">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#FFFDF9] p-6 rounded-3xl border border-[#E2DCD0] shadow-sm">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <div className="p-1.5 rounded-lg bg-gradient-to-r from-purple-500/20 to-cyan-500/20 border border-purple-500/40">
-              <Sliders className="w-5 h-5 text-cyan-400" />
+            <div className="p-1.5 rounded-xl bg-[#FAF7F0] border border-[#E2DCD0] text-[#0F172A]">
+              <Sliders className="w-5 h-5" />
             </div>
-            <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">AI-Driven Optimization</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-[#475569]">AI-Driven Optimization</span>
           </div>
-          <h1 className="text-3xl font-bold font-heading">What-If Model Simulator</h1>
-          <p className="text-gray-400 text-sm">
+          <h1 className="text-3xl font-extrabold font-heading text-[#0F172A]">What-If Model Simulator</h1>
+          <p className="text-[#475569] text-sm">
             Test hypothetical feature perturbations and compare model performance, latency, and cloud serving costs in real time.
           </p>
         </div>
@@ -247,7 +245,7 @@ export default function SimulatorPage() {
           </Button>
 
           <Button variant="secondary" onClick={handleRandomize} className="flex items-center gap-1.5 text-xs">
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
             Randomize Instance
           </Button>
         </div>
@@ -264,10 +262,10 @@ export default function SimulatorPage() {
 
       {/* Model Benchmark Selector Card */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="p-4 rounded-xl glass border-cyan-500/30 bg-cyan-500/5 space-y-2">
+        <div className="p-4 rounded-2xl bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm space-y-2">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-cyan-300">Baseline Production Model:</span>
-            <span className="font-mono text-[10px] text-gray-400">Reference Baseline</span>
+            <span className="font-bold text-[#0F172A]">Baseline Production Model:</span>
+            <span className="font-mono text-[10px] text-[#64748B]">Reference Baseline</span>
           </div>
           <select
             value={baselineModel}
@@ -276,20 +274,20 @@ export default function SimulatorPage() {
               setBaselineModel(val);
               triggerSimulation(scenarioValues, selectedDataset || undefined, val, hypotheticalModel);
             }}
-            className="w-full bg-[#0f172a] text-white border border-cyan-500/40 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500/50 cursor-pointer"
+            className="w-full bg-[#FAF7F0] text-[#0F172A] border border-[#CBD5E1] rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#0F172A]/20 cursor-pointer"
           >
             {(availableModels.length > 0 ? availableModels : ["Best Model (LightGBM)", "RandomForest (85.7% Acc)", "XGBoost (87.2% Acc)", "LogisticRegression (79.1% Acc)"]).map((m) => (
-              <option key={m} value={m} className="bg-[#0f172a] text-white py-1">
+              <option key={m} value={m} className="bg-[#FFFDF9] text-[#0F172A] py-1">
                 {m}
               </option>
             ))}
           </select>
         </div>
 
-        <div className="p-4 rounded-xl glass border-purple-500/30 bg-purple-500/5 space-y-2">
+        <div className="p-4 rounded-2xl bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm space-y-2">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-purple-300">Challenger / Hypothetical Architecture:</span>
-            <span className="font-mono text-[10px] text-gray-400">Simulated Target</span>
+            <span className="font-bold text-[#0F172A]">Challenger / Hypothetical Architecture:</span>
+            <span className="font-mono text-[10px] text-[#64748B]">Simulated Target</span>
           </div>
           <select
             value={hypotheticalModel}
@@ -298,10 +296,10 @@ export default function SimulatorPage() {
               setHypotheticalModel(val);
               triggerSimulation(scenarioValues, selectedDataset || undefined, baselineModel, val);
             }}
-            className="w-full bg-[#0f172a] text-white border border-purple-500/40 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-purple-500/50 cursor-pointer"
+            className="w-full bg-[#FAF7F0] text-[#0F172A] border border-[#CBD5E1] rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-[#0F172A]/20 cursor-pointer"
           >
             {(availableModels.length > 0 ? availableModels : ["XGBoost (Deep Trees)", "Neural Network (MLP)", "CatBoost Classifier", "Ensemble Stacking"]).map((m) => (
-              <option key={m} value={m} className="bg-[#0f172a] text-white py-1">
+              <option key={m} value={m} className="bg-[#FFFDF9] text-[#0F172A] py-1">
                 {m}
               </option>
             ))}
@@ -310,7 +308,7 @@ export default function SimulatorPage() {
       </div>
 
       {error && (
-        <div className="glass border-red-500/30 bg-red-500/10 p-4 rounded-xl text-red-400 text-sm flex items-center gap-2">
+        <div className="border border-rose-300 bg-rose-50 p-4 rounded-2xl text-rose-900 font-semibold text-sm flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>
@@ -320,22 +318,22 @@ export default function SimulatorPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Feature Perturbation Controls (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
-          <Card glow className="h-full">
-            <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-white/10">
+          <Card className="h-full">
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#E2DCD0]">
               <div className="flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-purple-400" />
-                <h3 className="font-bold text-sm sm:text-base text-white">Scenario Inputs</h3>
+                <Sliders className="w-4 h-4 text-[#0F172A]" />
+                <h3 className="font-bold text-sm sm:text-base text-[#0F172A]">Scenario Inputs</h3>
               </div>
               <input
                 type="text"
                 placeholder="Search features..."
                 value={searchFilter}
                 onChange={(e) => setSearchFilter(e.target.value)}
-                className="bg-[#0e1628] border border-white/15 rounded-lg px-2.5 py-1 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 w-full sm:w-36"
+                className="bg-[#FAF7F0] border border-[#CBD5E1] rounded-xl px-2.5 py-1 text-xs text-[#0F172A] placeholder-[#94A3B8] focus:outline-none focus:border-[#0F172A] w-full sm:w-36"
               />
             </CardHeader>
 
-            <CardBody className="p-4 space-y-5 max-h-[700px] overflow-y-auto">
+            <CardBody className="p-4 space-y-4 max-h-[700px] overflow-y-auto">
               {filteredFeatures.map((feat) => {
                 const isNumeric = feat.data_type === 'numeric';
                 const currentVal = scenarioValues[feat.name] ?? feat.default_value;
@@ -345,23 +343,23 @@ export default function SimulatorPage() {
                 return (
                   <div 
                     key={feat.name} 
-                    className={`p-3.5 rounded-xl border transition-colors ${
+                    className={`p-3.5 rounded-2xl border transition-all ${
                       isChanged 
-                        ? 'bg-purple-500/10 border-purple-500/40' 
-                        : 'bg-white/5 border-white/10 hover:border-white/20'
+                        ? 'bg-blue-50/60 border-blue-300 shadow-sm' 
+                        : 'bg-[#FAF7F0] border-[#E2DCD0] hover:border-[#CBD5E1]'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2 mb-2">
-                      <span className="text-xs font-bold text-white truncate max-w-[180px]" title={feat.name}>
+                      <span className="text-xs font-bold text-[#0F172A] truncate max-w-[180px]" title={feat.name}>
                         {feat.name}
                       </span>
                       <div className="flex items-center gap-1.5">
                         {isChanged && (
-                          <span className="text-[10px] text-purple-300 font-mono bg-purple-500/20 px-1.5 py-0.2 rounded">
+                          <span className="text-[10px] text-blue-800 font-mono font-bold bg-blue-100 px-1.5 py-0.5 rounded border border-blue-200">
                             Δ from {baselineVal}
                           </span>
                         )}
-                        <span className="text-xs font-mono font-bold text-cyan-300">
+                        <span className="text-xs font-mono font-bold text-[#0F172A]">
                           {currentVal}
                         </span>
                       </div>
@@ -376,9 +374,9 @@ export default function SimulatorPage() {
                           step={feat.step ?? 1}
                           value={currentVal}
                           onChange={(e) => handleFeatureChange(feat.name, parseFloat(e.target.value))}
-                          className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                          className="w-full h-1.5 bg-[#CBD5E1] rounded-lg appearance-none cursor-pointer accent-[#0F172A]"
                         />
-                        <div className="flex justify-between text-[10px] text-gray-500 font-mono">
+                        <div className="flex justify-between text-[10px] text-[#64748B] font-mono">
                           <span>Min: {feat.min_value}</span>
                           <span>Mean: {feat.mean_value}</span>
                           <span>Max: {feat.max_value}</span>
@@ -388,10 +386,10 @@ export default function SimulatorPage() {
                       <select
                         value={currentVal}
                         onChange={(e) => handleFeatureChange(feat.name, e.target.value)}
-                        className="w-full bg-[#10182b] border border-white/15 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 cursor-pointer"
+                        className="w-full bg-[#FFFDF9] border border-[#CBD5E1] rounded-xl px-2.5 py-1.5 text-xs text-[#0F172A] font-semibold focus:outline-none focus:border-[#0F172A] cursor-pointer"
                       >
                         {feat.categories?.map(cat => (
-                          <option key={cat} value={cat} className="bg-[#0e1628] text-white">
+                          <option key={cat} value={cat} className="bg-[#FFFDF9] text-[#0F172A]">
                             {cat}
                           </option>
                         ))}
@@ -402,7 +400,7 @@ export default function SimulatorPage() {
               })}
 
               {filteredFeatures.length === 0 && (
-                <div className="text-center py-8 text-gray-400 text-xs">
+                <div className="text-center py-8 text-[#64748B] text-xs">
                   No features matching &quot;{searchFilter}&quot;
                 </div>
               )}
@@ -414,22 +412,22 @@ export default function SimulatorPage() {
         <div className="lg:col-span-7 space-y-6">
           {/* Dual Outcome Comparison Hero */}
           {simulation && (
-            <div className="glass rounded-2xl p-6 border border-white/10 bg-gradient-to-br from-[#12192e] via-[#0d1424] to-[#0a0f1d] shadow-xl space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+            <div className="bg-[#FFFDF9] rounded-3xl p-6 border border-[#E2DCD0] shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E2DCD0]">
                 <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">Real-Time Prediction Delta</span>
-                  <h3 className="text-lg font-bold text-white">What-If Outcome Synthesis</h3>
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#64748B]">Real-Time Prediction Delta</span>
+                  <h3 className="text-xl font-extrabold text-[#0F172A]">What-If Outcome Synthesis</h3>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${
                     simulation.risk_level === 'Low'
-                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
                       : simulation.risk_level === 'Moderate'
-                      ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+                      ? 'bg-blue-50 text-blue-800 border-blue-300'
                       : simulation.risk_level === 'High'
-                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                      : 'bg-red-500/20 text-red-300 border-red-500/40'
+                      ? 'bg-amber-50 text-amber-800 border-amber-300'
+                      : 'bg-rose-50 text-rose-800 border-rose-300'
                   }`}>
                     {simulation.risk_level} Risk Tier
                   </span>
@@ -439,53 +437,53 @@ export default function SimulatorPage() {
               {/* Gauges Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Baseline Outcome */}
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Baseline Instance</span>
-                  <div className="text-2xl font-extrabold text-white">
+                <div className="p-4 rounded-2xl bg-[#FAF7F0] border border-[#E2DCD0] space-y-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B]">Baseline Instance</span>
+                  <div className="text-2xl font-extrabold text-[#0F172A]">
                     {Math.round(simulation.baseline_probability * 100)}%
                   </div>
-                  <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-[#E2DCD0] rounded-full h-2 overflow-hidden">
                     <div 
-                      className="bg-gray-400 h-2 rounded-full" 
+                      className="bg-[#64748B] h-2 rounded-full" 
                       style={{ width: `${simulation.baseline_probability * 100}%` }}
                     />
                   </div>
-                  <span className="text-xs text-gray-400">{simulation.baseline_prediction}</span>
+                  <span className="text-xs font-semibold text-[#475569]">{simulation.baseline_prediction}</span>
                 </div>
 
                 {/* What-If Scenario Outcome */}
-                <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/30 space-y-2">
+                <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-purple-300">Hypothetical Scenario</span>
-                    <span className="text-xs font-mono font-bold text-cyan-300">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-blue-900">Hypothetical Scenario</span>
+                    <span className="text-xs font-mono font-bold text-blue-800">
                       {simulation.probability_delta >= 0 ? '+' : ''}{Math.round(simulation.probability_delta * 100)}%
                     </span>
                   </div>
-                  <div className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400">
+                  <div className="text-2xl font-extrabold text-blue-900">
                     {Math.round(simulation.hypothetical_probability * 100)}%
                   </div>
-                  <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden">
                     <div 
-                      className="bg-gradient-to-r from-purple-500 to-cyan-400 h-2 rounded-full transition-all duration-300" 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
                       style={{ width: `${simulation.hypothetical_probability * 100}%` }}
                     />
                   </div>
-                  <span className="text-xs text-purple-200 font-medium">{simulation.hypothetical_prediction}</span>
+                  <span className="text-xs text-blue-950 font-semibold">{simulation.hypothetical_prediction}</span>
                 </div>
               </div>
 
               {/* Metric Delta Tiles */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {simulation.metrics_comparison?.map((m) => (
-                  <div key={m.metric_name} className="p-3 rounded-xl bg-black/30 border border-white/10 space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block truncate">
+                  <div key={m.metric_name} className="p-3 rounded-2xl bg-[#FAF7F0] border border-[#E2DCD0] space-y-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748B] block truncate">
                       {m.metric_name}
                     </span>
                     <div className="flex items-baseline justify-between gap-1">
-                      <span className="text-base font-bold text-white">
+                      <span className="text-base font-extrabold text-[#0F172A]">
                         {m.hypothetical_value}{m.unit}
                       </span>
-                      <span className={`text-xs font-semibold ${m.is_improvement ? 'text-emerald-400' : 'text-amber-400'}`}>
+                      <span className={`text-xs font-bold ${m.is_improvement ? 'text-emerald-700' : 'text-amber-700'}`}>
                         {m.delta >= 0 ? '+' : ''}{m.delta}{m.unit}
                       </span>
                     </div>
@@ -493,32 +491,32 @@ export default function SimulatorPage() {
                 ))}
               </div>
 
-              <p className="text-xs text-gray-300 bg-white/5 p-3 rounded-xl border border-white/5 leading-relaxed">
-                💡 <strong className="text-white">Simulator Insight:</strong> {simulation.explanation}
+              <p className="text-xs text-[#334155] bg-[#FAF7F0] p-3.5 rounded-2xl border border-[#E2DCD0] leading-relaxed">
+                💡 <strong className="text-[#0F172A]">Simulator Insight:</strong> {simulation.explanation}
               </p>
             </div>
           )}
 
           {/* Model Architecture Switcher & Trade-Off Matrix */}
-          <Card glow>
-            <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+          <Card>
+            <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E2DCD0]">
               <div className="flex items-center gap-2">
-                <Cpu className="w-4 h-4 text-cyan-400" />
-                <h3 className="font-bold text-sm sm:text-base text-white">Algorithm Trade-Off Simulator</h3>
+                <Cpu className="w-4 h-4 text-[#0F172A]" />
+                <h3 className="font-bold text-sm sm:text-base text-[#0F172A]">Algorithm Trade-Off Simulator</h3>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-400 whitespace-nowrap">Compare With:</span>
+                <span className="text-xs text-[#64748B] font-semibold whitespace-nowrap">Compare With:</span>
                 <select
                   value={hypotheticalModel}
                   onChange={(e) => {
                     setHypotheticalModel(e.target.value);
                     triggerSimulation(scenarioValues, selectedDataset || undefined, baselineModel, e.target.value);
                   }}
-                  className="bg-[#0e1628] border border-cyan-500/40 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-cyan-400 cursor-pointer"
+                  className="bg-[#FAF7F0] border border-[#CBD5E1] rounded-xl px-2.5 py-1 text-xs text-[#0F172A] font-semibold focus:outline-none focus:border-[#0F172A] cursor-pointer"
                 >
                   {availableModels.map(m => (
-                    <option key={m} value={m} className="bg-[#0e1628] text-white">{m}</option>
+                    <option key={m} value={m} className="bg-[#FFFDF9] text-[#0F172A]">{m}</option>
                   ))}
                 </select>
               </div>
@@ -528,7 +526,7 @@ export default function SimulatorPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-white/10 text-gray-400 uppercase tracking-wider text-[10px]">
+                    <tr className="border-b border-[#E2DCD0] text-[#64748B] uppercase tracking-wider text-[10px]">
                       <th className="pb-2 font-bold">Algorithm</th>
                       <th className="pb-2 font-bold">Accuracy</th>
                       <th className="pb-2 font-bold">P95 Latency</th>
@@ -536,28 +534,28 @@ export default function SimulatorPage() {
                       <th className="pb-2 font-bold">Cloud Cost</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
+                  <tbody className="divide-y divide-[#E2DCD0]">
                     {simulation?.architecture_matrix?.map((arch) => {
                       const isSelected = arch.algorithm === hypotheticalModel;
                       return (
                         <tr 
                           key={arch.algorithm} 
-                          className={`hover:bg-white/5 transition-colors ${
-                            isSelected ? 'bg-cyan-500/10 font-bold text-white' : 'text-gray-300'
+                          className={`transition-colors ${
+                            isSelected ? 'bg-blue-50/80 font-bold text-[#0F172A]' : 'text-[#334155] hover:bg-[#FAF7F0]'
                           }`}
                         >
                           <td className="py-2.5 pr-2 flex items-center gap-1.5">
                             {arch.is_recommended && (
-                              <span className="px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 text-[9px] uppercase font-bold">
+                              <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[9px] uppercase font-bold border border-emerald-200">
                                 Rec
                               </span>
                             )}
-                            <span>{arch.algorithm}</span>
+                            <span className="font-semibold text-[#0F172A]">{arch.algorithm}</span>
                           </td>
-                          <td className="py-2.5 text-emerald-400 font-semibold">{arch.accuracy_score}%</td>
-                          <td className="py-2.5 font-mono">{arch.p95_latency_ms}ms</td>
-                          <td className="py-2.5 font-mono text-gray-400">{arch.memory_mb}MB</td>
-                          <td className="py-2.5 font-mono text-cyan-300">${arch.monthly_cost_usd}/mo</td>
+                          <td className="py-2.5 text-emerald-700 font-bold">{arch.accuracy_score}%</td>
+                          <td className="py-2.5 font-mono text-[#0F172A]">{arch.p95_latency_ms}ms</td>
+                          <td className="py-2.5 font-mono text-[#64748B]">{arch.memory_mb}MB</td>
+                          <td className="py-2.5 font-mono font-bold text-blue-700">${arch.monthly_cost_usd}/mo</td>
                         </tr>
                       );
                     })}
@@ -568,11 +566,11 @@ export default function SimulatorPage() {
           </Card>
 
           {/* Feature Sensitivity Curve Plot */}
-          <Card glow>
-            <CardHeader className="pb-2 border-b border-white/10">
+          <Card>
+            <CardHeader className="pb-2 border-b border-[#E2DCD0]">
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-emerald-400" />
-                <h3 className="font-bold text-sm sm:text-base text-white">Feature Sensitivity Analysis</h3>
+                <TrendingUp className="w-4 h-4 text-emerald-700" />
+                <h3 className="font-bold text-sm sm:text-base text-[#0F172A]">Feature Sensitivity Analysis</h3>
               </div>
             </CardHeader>
             <CardBody className="h-[280px]">
@@ -590,3 +588,4 @@ export default function SimulatorPage() {
     </div>
   );
 }
+

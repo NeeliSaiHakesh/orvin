@@ -155,7 +155,7 @@ Gate Verdict: ${displayScore >= 90 ? 'APPROVED (Certified Production Ready)' : (
 Executive Summary:
 ${data.verdict_summary}
 
-Signed-Off By: AutoMLOps Automated Governance Engine
+Signed-Off By: Orvin AI Automated Governance Engine
 `;
     const blob = new Blob([cert], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
@@ -210,30 +210,30 @@ Signed-Off By: AutoMLOps Automated Governance Engine
   };
 
   const radarLayout = {
-    paper_bgcolor: 'transparent',
-    plot_bgcolor: 'transparent',
-    font: { color: '#F9FAFB', size: 10 },
+    paper_bgcolor: '#FFFDF9',
+    plot_bgcolor: '#FFFDF9',
+    font: { color: '#0F172A', size: 10, family: 'inherit' },
     polar: {
-      radialaxis: { visible: true, range: [0, 100], color: '#4B5563', gridcolor: '#1f293d' },
-      angularaxis: { color: '#9CA3AF', gridcolor: '#1f293d' }
+      radialaxis: { visible: true, range: [0, 100], color: '#64748B', gridcolor: '#E2DCD0' },
+      angularaxis: { color: '#0F172A', gridcolor: '#E2DCD0' }
     },
     margin: { t: 30, b: 30, l: 40, r: 40 },
     showlegend: false
   };
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-8 animate-fade-in text-[#0F172A]">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <div className="p-1.5 rounded-lg bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-500/40">
-              <Award className="w-5 h-5 text-cyan-400" />
+            <div className="p-1.5 rounded-lg bg-cyan-100 border border-cyan-200">
+              <Award className="w-5 h-5 text-cyan-800" />
             </div>
-            <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">Production Governance & QA</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-cyan-800">Production Governance & QA</span>
           </div>
-          <h1 className="text-3xl font-bold font-heading">Model Health & Readiness Score</h1>
-          <p className="text-gray-400 text-sm">
+          <h1 className="text-3xl font-bold font-heading text-[#0F172A]">Model Health & Readiness Score</h1>
+          <p className="text-[#475569] text-sm">
             5-pillar production gate evaluation across Performance, Latency SLA, Data Quality, Drift Observability, and Fairness.
           </p>
         </div>
@@ -243,7 +243,7 @@ Signed-Off By: AutoMLOps Automated Governance Engine
             variant="secondary" 
             onClick={downloadSignOffCertificate}
             disabled={!data || loading}
-            className="flex items-center gap-1.5 text-xs"
+            className="flex items-center gap-1.5 text-xs bg-[#FFFDF9] hover:bg-[#FAF7F2] text-[#0F172A] border border-[#E2DCD0]"
           >
             <Download className="w-3.5 h-3.5" />
             Export Certificate
@@ -252,7 +252,7 @@ Signed-Off By: AutoMLOps Automated Governance Engine
           <Button 
             onClick={() => selectedDataset ? handleDatasetSelect(selectedDataset) : loadDatasetsAndScore()} 
             disabled={loading}
-            className="flex items-center gap-1.5 text-xs"
+            className="flex items-center gap-1.5 text-xs bg-[#0F172A] hover:bg-[#1E293B] text-white"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             Re-Audit
@@ -270,49 +270,49 @@ Signed-Off By: AutoMLOps Automated Governance Engine
       />
 
       {error && (
-        <div className="glass border-red-500/30 bg-red-500/10 p-4 rounded-xl text-red-400 text-sm flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 shrink-0" />
+        <div className="bg-red-50 border border-red-200 p-4 rounded-xl text-red-800 text-sm flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 shrink-0 text-red-600" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Production Gate Hero Banner */}
       {data && (
-        <div className="glass rounded-2xl p-6 border border-white/10 bg-gradient-to-br from-[#0e1628] via-[#0d1424] to-[#0a0f1d] shadow-xl">
+        <div className="rounded-2xl p-6 border border-[#E2DCD0] bg-[#FFFDF9] shadow-sm">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
             <div className="space-y-3 max-w-2xl">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-cyan-400" />
-                <span className="text-xs font-bold uppercase tracking-wider text-gray-300">Governance Verdict</span>
+                <ShieldCheck className="w-4 h-4 text-cyan-800" />
+                <span className="text-xs font-bold uppercase tracking-wider text-[#475569]">Governance Verdict</span>
                 <span className={`px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider border ${
                   displayScore >= 90
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                    ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
                     : displayScore >= 75
-                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
-                    : 'bg-red-500/20 text-red-300 border-red-500/40'
+                    ? 'bg-cyan-100 text-cyan-900 border-cyan-300'
+                    : 'bg-rose-100 text-rose-900 border-rose-300'
                 }`}>
                   {displayScore >= 90 ? '🟢 Certified Production-Ready' : (displayScore >= 75 ? '🟡 Conditional Approval' : '🔴 Deployment Blocked')}
                 </span>
               </div>
 
-              <h2 className="text-xl sm:text-2xl font-bold text-white leading-snug">
+              <h2 className="text-xl sm:text-2xl font-bold text-[#0F172A] leading-snug">
                 {displayScore >= 90 ? 'Automated Release Authorized' : (displayScore >= 75 ? 'Production Deployment Approved with Active Monitoring' : 'Governance Blockers Identified')}
               </h2>
 
-              <p className="text-xs sm:text-sm text-gray-300 leading-relaxed font-normal">
+              <p className="text-xs sm:text-sm text-[#334155] leading-relaxed font-medium">
                 {data.verdict_summary}
               </p>
             </div>
 
             {/* Overall Score Radial Gauge */}
-            <div className="flex flex-col items-center justify-center p-5 rounded-2xl bg-white/5 border border-white/10 shrink-0 min-w-[180px] text-center">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Production Health</span>
-              <div className="text-5xl font-extrabold font-heading text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-emerald-400">
+            <div className="flex flex-col items-center justify-center p-5 rounded-2xl bg-[#FAF7F2] border border-[#E2DCD0] shrink-0 min-w-[180px] text-center">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B] mb-1">Production Health</span>
+              <div className="text-5xl font-extrabold font-heading text-cyan-900">
                 {displayScore}
               </div>
-              <span className="text-[11px] text-gray-400 mt-1">out of 100 points</span>
+              <span className="text-[11px] text-[#64748B] mt-1 font-medium">out of 100 points</span>
               {computedBonusPoints > 0 && (
-                <span className="text-[10px] text-emerald-400 font-mono mt-0.5">
+                <span className="text-[10px] text-emerald-800 font-mono font-bold mt-0.5">
                   +{computedBonusPoints} pts from remediations
                 </span>
               )}
@@ -325,8 +325,8 @@ Signed-Off By: AutoMLOps Automated Governance Engine
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: 5 Pillar Cards (7 cols) */}
         <div className="lg:col-span-7 space-y-4">
-          <h3 className="text-sm font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2">
-            <Layers className="w-4 h-4 text-cyan-400" /> Multi-Pillar Governance Scorecards
+          <h3 className="text-sm font-bold text-[#475569] uppercase tracking-wider flex items-center gap-2">
+            <Layers className="w-4 h-4 text-cyan-700" /> Multi-Pillar Governance Scorecards
           </h3>
 
           <div className="space-y-3">
@@ -337,40 +337,40 @@ Signed-Off By: AutoMLOps Automated Governance Engine
               return (
                 <div 
                   key={p.id}
-                  className="glass rounded-2xl p-4 border border-white/10 bg-[#0d1424]/80 space-y-3 hover:border-white/20 transition-all"
+                  className="rounded-2xl p-4 border border-[#E2DCD0] bg-[#FFFDF9] shadow-sm space-y-3 hover:border-[#CBD5E1] transition-all"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5">
-                      <div className="p-2 rounded-xl bg-white/5 border border-white/10">
+                      <div className="p-2 rounded-xl bg-[#FAF7F2] border border-[#E2DCD0]">
                         {getPillarIcon(p.icon)}
                       </div>
                       <div>
-                        <h4 className="text-sm font-bold text-white">{p.name}</h4>
-                        <span className="text-[11px] text-gray-400">Weight: {p.weight} pts</span>
+                        <h4 className="text-sm font-bold text-[#0F172A]">{p.name}</h4>
+                        <span className="text-[11px] text-[#64748B]">Weight: {p.weight} pts</span>
                       </div>
                     </div>
 
                     <div className="text-right">
-                      <div className="text-base font-extrabold text-cyan-300 font-mono">
-                        {p.score} <span className="text-xs text-gray-400 font-normal">/ {p.max_score}</span>
+                      <div className="text-base font-extrabold text-cyan-900 font-mono">
+                        {p.score} <span className="text-xs text-[#64748B] font-normal">/ {p.max_score}</span>
                       </div>
-                      <span className="text-[10px] text-emerald-400 font-semibold">{pct}%</span>
+                      <span className="text-[10px] text-emerald-800 font-bold">{pct}%</span>
                     </div>
                   </div>
 
                   {/* Progress Bar */}
-                  <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-[#E2DCD0] rounded-full h-1.5 overflow-hidden">
                     <div 
-                      className="bg-gradient-to-r from-cyan-500 to-purple-500 h-1.5 rounded-full transition-all duration-300"
+                      className="bg-cyan-700 h-1.5 rounded-full transition-all duration-300"
                       style={{ width: `${pct}%` }}
                     />
                   </div>
 
                   {/* Accordion Toggle */}
-                  <div className="pt-2 border-t border-white/5 flex justify-between items-center text-xs">
+                  <div className="pt-2 border-t border-[#E2DCD0] flex justify-between items-center text-xs">
                     <button
                       onClick={() => setExpandedPillar(isExpanded ? null : p.id)}
-                      className="text-cyan-400 hover:text-cyan-300 font-medium flex items-center gap-1 text-[11px]"
+                      className="text-cyan-800 hover:text-cyan-950 font-bold flex items-center gap-1 text-[11px]"
                     >
                       <span>{isExpanded ? 'Hide Metric Audit' : `View ${p.metrics.length} Detailed Checks`}</span>
                       {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -379,14 +379,14 @@ Signed-Off By: AutoMLOps Automated Governance Engine
 
                   {/* Sub-Metrics Breakdown */}
                   {isExpanded && (
-                    <div className="mt-3 space-y-2 pt-2 border-t border-white/10 animate-slide-up text-xs">
+                    <div className="mt-3 space-y-2 pt-2 border-t border-[#E2DCD0] animate-slide-up text-xs">
                       {p.metrics.map((m) => (
-                        <div key={m.name} className="p-2.5 rounded-xl bg-black/30 border border-white/5 space-y-1">
+                        <div key={m.name} className="p-2.5 rounded-xl bg-[#FAF7F2] border border-[#E2DCD0] space-y-1">
                           <div className="flex justify-between items-center text-[11px]">
-                            <span className="font-semibold text-white">{m.name}</span>
-                            <span className="font-mono text-cyan-300">{m.score}/{m.max_score} pts</span>
+                            <span className="font-semibold text-[#0F172A]">{m.name}</span>
+                            <span className="font-mono text-cyan-900 font-bold">{m.score}/{m.max_score} pts</span>
                           </div>
-                          <p className="text-[11px] text-gray-400">{m.detail}</p>
+                          <p className="text-[11px] text-[#475569]">{m.detail}</p>
                         </div>
                       ))}
                     </div>
@@ -400,11 +400,11 @@ Signed-Off By: AutoMLOps Automated Governance Engine
         {/* Right Column: Radar Chart & Remediation Checklist (5 cols) */}
         <div className="lg:col-span-5 space-y-6">
           {/* Radar Chart Card */}
-          <Card glow>
-            <CardHeader className="pb-2 border-b border-white/10">
+          <Card className="bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm">
+            <CardHeader className="pb-2 border-b border-[#E2DCD0]">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-purple-400" />
-                <h3 className="font-bold text-sm text-white">5-Pillar Balance Radar</h3>
+                <Sparkles className="w-4 h-4 text-purple-700" />
+                <h3 className="font-bold text-sm text-[#0F172A]">5-Pillar Balance Radar</h3>
               </div>
             </CardHeader>
             <CardBody className="h-[270px]">
@@ -419,13 +419,13 @@ Signed-Off By: AutoMLOps Automated Governance Engine
           </Card>
 
           {/* Remediation Action Checklist */}
-          <Card glow>
-            <CardHeader className="pb-3 border-b border-white/10 flex justify-between items-center">
+          <Card className="bg-[#FFFDF9] border border-[#E2DCD0] shadow-sm">
+            <CardHeader className="pb-3 border-b border-[#E2DCD0] flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <h3 className="font-bold text-sm text-white">Remediation Checklist</h3>
+                <CheckCircle2 className="w-4 h-4 text-emerald-700" />
+                <h3 className="font-bold text-sm text-[#0F172A]">Remediation Checklist</h3>
               </div>
-              <span className="text-[11px] text-gray-400">Resolve to earn bonus points</span>
+              <span className="text-[11px] text-[#64748B]">Resolve to earn bonus points</span>
             </CardHeader>
 
             <CardBody className="p-4 space-y-3">
@@ -436,29 +436,29 @@ Signed-Off By: AutoMLOps Automated Governance Engine
                   <div
                     key={item.id}
                     onClick={() => toggleRemediation(item.id)}
-                    className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
+                    className={`p-3.5 rounded-xl border transition-all cursor-pointer shadow-sm ${
                       isCompleted
-                        ? 'bg-emerald-500/10 border-emerald-500/40 text-gray-300'
-                        : 'bg-white/5 border-white/10 hover:border-white/20'
+                        ? 'bg-emerald-50 border-emerald-300 text-[#475569]'
+                        : 'bg-[#FAF7F2] border-[#E2DCD0] hover:border-[#CBD5E1]'
                     }`}
                   >
                     <div className="flex items-start gap-3">
                       <div className={`w-5 h-5 rounded-lg border mt-0.5 flex items-center justify-center shrink-0 transition-colors ${
-                        isCompleted ? 'bg-emerald-500 border-emerald-400 text-black' : 'border-white/30 bg-black/30'
+                        isCompleted ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-[#CBD5E1] bg-white'
                       }`}>
-                        {isCompleted && <Check className="w-3.5 h-3.5 font-extrabold text-black" />}
+                        {isCompleted && <Check className="w-3.5 h-3.5 font-extrabold text-white" />}
                       </div>
 
                       <div className="space-y-1 flex-1">
                         <div className="flex items-center justify-between gap-1">
-                          <span className={`text-xs font-bold ${isCompleted ? 'line-through text-gray-400' : 'text-white'}`}>
+                          <span className={`text-xs font-bold ${isCompleted ? 'line-through text-[#64748B]' : 'text-[#0F172A]'}`}>
                             {item.title}
                           </span>
-                          <span className="text-[10px] font-mono font-bold text-emerald-300 bg-emerald-500/20 px-1.5 py-0.2 rounded shrink-0">
+                          <span className="text-[10px] font-mono font-bold text-emerald-900 bg-emerald-100 px-1.5 py-0.2 rounded shrink-0 border border-emerald-200">
                             +{item.points_gain} pts
                           </span>
                         </div>
-                        <p className="text-[11px] text-gray-400 leading-snug">{item.action}</p>
+                        <p className="text-[11px] text-[#475569] leading-snug">{item.action}</p>
                       </div>
                     </div>
                   </div>

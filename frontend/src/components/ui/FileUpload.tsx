@@ -80,54 +80,54 @@ export function FileUpload({
       {!file ? (
         <div 
           {...getRootProps()} 
-          className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-200 
-            ${isDragActive ? 'border-cyan-400 bg-cyan-400/10' : 'border-white/20 hover:border-purple-400 hover:bg-white/5'}
-            ${isDragReject ? 'border-red-400 bg-red-400/10' : ''}`}
+          className={`border-2 border-dashed rounded-3xl p-10 text-center cursor-pointer transition-all duration-200 
+            ${isDragActive ? 'border-[#0F172A] bg-[#F4EFE6]' : 'border-[#CBD5E1] bg-[#FAF7F0] hover:border-[#0F172A] hover:bg-[#F4EFE6]'}
+            ${isDragReject ? 'border-rose-400 bg-rose-50' : ''}`}
         >
           <input {...getInputProps()} />
-          <UploadCloud className={`mx-auto h-14 w-14 mb-3 ${isDragActive ? 'text-cyan-400' : 'text-gray-400'}`} />
-          <h3 className="text-lg font-medium mb-1">Drag & Drop your dataset here</h3>
-          <p className="text-gray-400 text-sm mb-4">Supports CSV, Excel (.xlsx), and JSON (max 100MB)</p>
+          <UploadCloud className={`mx-auto h-12 w-12 mb-3 ${isDragActive ? 'text-[#0F172A]' : 'text-[#64748B]'}`} />
+          <h3 className="text-base font-bold text-[#0F172A] mb-1">Drag & Drop your dataset here</h3>
+          <p className="text-[#64748B] text-xs mb-4">Supports CSV, Excel (.xlsx), and JSON (max 100MB)</p>
           <Button variant="secondary" size="sm" type="button">Browse Files</Button>
         </div>
       ) : (
-        <div className="glass p-5 w-full relative overflow-hidden rounded-xl border border-white/10">
+        <div className="p-5 w-full relative overflow-hidden rounded-2xl border border-[#E2DCD0] bg-[#FFFDF9] shadow-sm">
           {(isUploading || loading) && (
             <div 
-              className="absolute top-0 left-0 h-1 bg-gradient-to-r from-purple-500 to-cyan-500 transition-all duration-300" 
+              className="absolute top-0 left-0 h-1 bg-[#0F172A] transition-all duration-300" 
               style={{ width: `${progress}%` }} 
             />
           )}
           
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-purple-500/20 text-purple-400 rounded-lg">
-                {isDone ? <CheckCircle2 className="text-green-400 w-5 h-5" /> : (isUploading ? <Loader2 className="w-5 h-5 animate-spin text-cyan-400" /> : <File className="w-5 h-5" />)}
+              <div className="p-3 bg-[#FAF7F0] border border-[#E2DCD0] text-[#0F172A] rounded-xl">
+                {isDone ? <CheckCircle2 className="text-emerald-700 w-5 h-5" /> : (isUploading ? <Loader2 className="w-5 h-5 animate-spin text-blue-700" /> : <File className="w-5 h-5" />)}
               </div>
               <div>
-                <h4 className="font-medium text-sm text-white">{file.name}</h4>
-                <p className="text-xs text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                <h4 className="font-bold text-sm text-[#0F172A]">{file.name}</h4>
+                <p className="text-xs text-[#64748B]">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
               </div>
             </div>
             
             <div className="flex items-center gap-2">
               {isDone ? (
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1">
-                    <CheckCircle2 className="w-4 h-4" /> Uploaded & Ingested
+                  <span className="text-xs text-emerald-800 font-bold flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-700" /> Uploaded & Ingested
                   </span>
                   <Button variant="ghost" size="sm" onClick={() => { setFile(null); setIsDone(false); }}>
                     Upload Another
                   </Button>
                 </div>
               ) : (isUploading || loading) ? (
-                <span className="text-xs font-medium text-cyan-400 flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" /> Ingesting Data...
+                <span className="text-xs font-bold text-blue-800 flex items-center gap-2 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">
+                  <Loader2 className="w-4 h-4 animate-spin text-blue-700" /> Ingesting Data...
                 </span>
               ) : (
                 <div className="flex items-center gap-2">
                   <Button variant="ghost" size="sm" onClick={() => setFile(null)}>
-                    <X className="w-4 h-4" />
+                    <X className="w-4 h-4 text-[#64748B]" />
                   </Button>
                   <Button onClick={() => startUpload(file)} size="sm">Retry Upload</Button>
                 </div>
@@ -136,7 +136,7 @@ export function FileUpload({
           </div>
 
           {errorMessage && (
-            <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg mt-3 text-xs text-red-400">
+            <div className="p-3 bg-rose-50 border border-rose-300 rounded-xl mt-3 text-xs text-rose-900 font-semibold">
               {errorMessage}
             </div>
           )}

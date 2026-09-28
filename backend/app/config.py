@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     MODEL_REGISTRY_DIR: str = os.path.join(BASE_DIR, "model_registry")
     MAX_UPLOAD_SIZE: int = 104857600  # 100MB
     GEMINI_API_KEY: str = ""
+    GROQ_API_KEY: str = ""
+    HINDSIGHT_API_KEY: str = ""
     DEBUG: bool = True
 
     class Config:

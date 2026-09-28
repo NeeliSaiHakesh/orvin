@@ -1,24 +1,9 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ 
-  subsets: ["latin"], 
-  variable: "--font-inter",
-  display: "swap",
-  fallback: ["system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"]
-});
-
-const outfit = Outfit({ 
-  subsets: ["latin"], 
-  variable: "--font-outfit",
-  display: "swap",
-  fallback: ["sans-serif"]
-});
-
 export const metadata: Metadata = {
-  title: "AutoMLOps - AI-Powered MLOps Platform",
-  description: "End-to-end machine learning platform",
+  title: "Orvin AI — Autonomous Pre-Flight Gate & Enterprise AutoML",
+  description: "Autonomous pre-flight CI/CD gate and machine learning platform powered by Hindsight Memory and Groq Llama 3.3.",
 };
 
 export default function RootLayout({
@@ -27,8 +12,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`dark ${inter.variable} ${outfit.variable}`}>
-      <body className="bg-[#0a0a1a] text-[#F9FAFB] font-sans antialiased min-h-screen flex flex-col">
+    <html lang="en">
+      <body className="bg-[#F5F1E8] text-[#0F172A] font-sans antialiased min-h-screen flex flex-col selection:bg-[#E2DCD0] selection:text-[#0F172A]">
         {children}
       </body>
     </html>

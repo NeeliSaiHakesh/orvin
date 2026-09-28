@@ -2,8 +2,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { 
-  BrainCircuit, Menu, Bell, User, LogOut, 
-  CheckCircle2, Cpu, Database, Bot, Sparkles, X, Trash2,
+  Menu, Bell, LogOut, 
+  CheckCircle2, Cpu, Database, Bot, Sparkles, Trash2,
   Plus, FolderGit2
 } from 'lucide-react';
 import { useAuthStore, useUIStore } from '@/lib/store';
@@ -27,19 +27,19 @@ export function Navbar() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([
     {
       id: '1',
-      title: 'AutoML Training Completed',
-      message: '8 algorithms trained & ranked. Best model: RandomForest (85.7% accuracy).',
+      title: 'Orvin Gate Active',
+      message: 'Hindsight Memory pre-flight CI/CD gate loaded with 3 enterprise post-mortems.',
       time: 'Just now',
       read: false,
-      type: 'training'
+      type: 'system'
     },
     {
       id: '2',
-      title: 'AI MLOps Assistant Online',
-      message: 'Grounding pipeline initialized with real project metrics & SHAP values.',
+      title: 'AutoML Training Completed',
+      message: '8 algorithms trained & ranked. Best model: RandomForest (85.7% accuracy).',
       time: '2m ago',
       read: false,
-      type: 'assistant'
+      type: 'training'
     },
     {
       id: '3',
@@ -48,14 +48,6 @@ export function Navbar() {
       time: '5m ago',
       read: true,
       type: 'dataset'
-    },
-    {
-      id: '4',
-      title: 'FastAPI Microservice Ready',
-      message: 'REST API, Swagger docs & Dockerfile packaged for one-click export.',
-      time: '10m ago',
-      read: true,
-      type: 'system'
     }
   ]);
 
@@ -84,13 +76,13 @@ export function Navbar() {
   const getNotifIcon = (type: NotificationItem['type']) => {
     switch (type) {
       case 'training':
-        return <Cpu className="w-4 h-4 text-emerald-400" />;
+        return <Cpu className="w-4 h-4 text-emerald-700" />;
       case 'assistant':
-        return <Bot className="w-4 h-4 text-purple-400" />;
+        return <Bot className="w-4 h-4 text-purple-700" />;
       case 'dataset':
-        return <Database className="w-4 h-4 text-cyan-400" />;
+        return <Database className="w-4 h-4 text-blue-700" />;
       default:
-        return <Sparkles className="w-4 h-4 text-amber-400" />;
+        return <Sparkles className="w-4 h-4 text-amber-700" />;
     }
   };
 
@@ -100,27 +92,29 @@ export function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-40 w-full bg-[#0a0f1d]/95 backdrop-blur-md border-b border-white/10 px-4 h-16 flex items-center justify-between">
+    <nav className="sticky top-0 z-40 w-full bg-[#FFFFFF] border-b border-[#D6CEBE] px-4 h-16 flex items-center justify-between text-[#0F172A] shadow-xs">
       <div className="flex items-center gap-4">
-        <button onClick={toggleSidebar} className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors">
+        <button onClick={toggleSidebar} className="p-2 hover:bg-[#EFEAE1] rounded-xl text-[#334155] hover:text-[#0F172A] transition-colors">
           <Menu className="w-5 h-5" />
         </button>
         <Link href="/dashboard" className="text-xl font-bold font-heading flex items-center gap-2">
-          <BrainCircuit className="text-cyan-400" />
-          <span className="gradient-text hidden sm:inline-block">AutoMLOps</span>
+          {/* Logo icon removed per user request */}
+          <span className="font-extrabold text-[#0f172a] tracking-tight text-lg">
+            Orvin <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]">AI Gate</span>
+          </span>
         </Link>
         <Link 
           href="/dashboard" 
-          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#475569] hover:text-[#0f172a] hover:bg-[#EFEBE0] transition-colors"
         >
-          <FolderGit2 className="w-3.5 h-3.5 text-purple-400" />
+          <FolderGit2 className="w-3.5 h-3.5 text-[#0f172a]" />
           <span>Projects</span>
         </Link>
       </div>
 
       <div className="flex items-center gap-3">
         <Link href="/projects/new">
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-500 hover:to-cyan-500 text-white text-xs font-semibold shadow-md transition-all">
+          <button className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#0F172A] hover:bg-[#1E293B] text-white text-xs font-bold shadow-sm transition-all">
             <Plus className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">New Project</span>
           </button>
@@ -130,27 +124,27 @@ export function Navbar() {
         <div className="relative" ref={notifRef}>
           <button 
             onClick={() => setShowNotifications(!showNotifications)}
-            className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors relative"
+            className="p-2 hover:bg-[#EFEBE0] rounded-lg text-[#475569] hover:text-[#0f172a] transition-colors relative"
             title="Notifications"
           >
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
               <span className="absolute top-1 right-1 flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-purple-500 text-[9px] text-white items-center justify-center font-bold"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-600 text-[9px] text-white items-center justify-center font-bold"></span>
               </span>
             )}
           </button>
 
-          {/* Solid High-Contrast Dropdown Panel */}
+          {/* Light Cream High-Contrast Dropdown Panel */}
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-[#0e1628] border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.9)] z-50 animate-slide-up overflow-hidden">
-              <div className="p-4 border-b border-white/10 flex items-center justify-between bg-[#080d19]">
+            <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-[#FFFDF9] border border-[#E2DCD0] shadow-xl z-50 animate-slide-up overflow-hidden text-[#0f172a]">
+              <div className="p-4 border-b border-[#E2DCD0] flex items-center justify-between bg-[#FAF7F0]">
                 <div className="flex items-center gap-2">
-                  <Bell className="w-4 h-4 text-purple-400" />
-                  <span className="font-bold text-sm text-white">Notifications</span>
+                  <Bell className="w-4 h-4 text-[#0f172a]" />
+                  <span className="font-bold text-sm text-[#0f172a]">Notifications</span>
                   {unreadCount > 0 && (
-                    <span className="px-2 py-0.5 rounded-full bg-purple-500/30 text-purple-300 text-xs font-semibold border border-purple-500/40">
+                    <span className="px-2 py-0.5 rounded-full bg-[#FEF3C7] text-[#92400E] text-xs font-semibold border border-[#FDE68A]">
                       {unreadCount} new
                     </span>
                   )}
@@ -159,7 +153,7 @@ export function Navbar() {
                   {unreadCount > 0 && (
                     <button 
                       onClick={markAllAsRead} 
-                      className="text-cyan-400 hover:text-cyan-300 font-medium transition-colors"
+                      className="text-amber-800 hover:text-amber-900 font-bold transition-colors"
                     >
                       Mark all read
                     </button>
@@ -167,7 +161,7 @@ export function Navbar() {
                   {notifications.length > 0 && (
                     <button 
                       onClick={clearNotifications}
-                      className="text-gray-400 hover:text-red-400 transition-colors p-1"
+                      className="text-[#64748b] hover:text-red-600 transition-colors p-1"
                       title="Clear all"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -176,10 +170,10 @@ export function Navbar() {
                 </div>
               </div>
 
-              <div className="max-h-80 overflow-y-auto divide-y divide-white/10 bg-[#0e1628]">
+              <div className="max-h-80 overflow-y-auto divide-y divide-[#E2DCD0] bg-[#FFFDF9]">
                 {notifications.length === 0 ? (
-                  <div className="p-8 text-center text-gray-400 text-sm">
-                    <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-gray-500" />
+                  <div className="p-8 text-center text-[#64748b] text-sm">
+                    <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-[#94a3b8]" />
                     No new notifications
                   </div>
                 ) : (
@@ -187,18 +181,18 @@ export function Navbar() {
                     <div 
                       key={notif.id}
                       className={`p-4 transition-colors flex gap-3 ${
-                        notif.read ? 'bg-[#0e1628] hover:bg-[#152038]' : 'bg-[#1a233d] hover:bg-[#202c4b]'
+                        notif.read ? 'bg-[#FFFDF9] hover:bg-[#FAF7F0]' : 'bg-[#FEF3C7]/30 hover:bg-[#FEF3C7]/50'
                       }`}
                     >
-                      <div className="p-2 rounded-xl bg-[#080d19] border border-white/10 h-fit shrink-0 mt-0.5">
+                      <div className="p-2 rounded-xl bg-[#FAF7F0] border border-[#E2DCD0] h-fit shrink-0 mt-0.5">
                         {getNotifIcon(notif.type)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2 mb-1">
-                          <h4 className="text-xs font-bold text-white truncate">{notif.title}</h4>
-                          <span className="text-[10px] text-gray-400 shrink-0 font-mono">{notif.time}</span>
+                          <h4 className="text-xs font-bold text-[#0f172a] truncate">{notif.title}</h4>
+                          <span className="text-[10px] text-[#64748b] shrink-0 font-mono">{notif.time}</span>
                         </div>
-                        <p className="text-xs text-gray-300 leading-relaxed font-normal">{notif.message}</p>
+                        <p className="text-xs text-[#334155] leading-relaxed font-normal">{notif.message}</p>
                       </div>
                     </div>
                   ))
@@ -209,14 +203,14 @@ export function Navbar() {
         </div>
         
         {/* User Profile */}
-        <div className="flex items-center gap-3 pl-4 border-l border-white/10">
-          <div suppressHydrationWarning className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500 flex items-center justify-center text-sm font-bold text-white shadow-lg">
+        <div className="flex items-center gap-3 pl-4 border-l border-[#E2DCD0]">
+          <div suppressHydrationWarning className="w-8 h-8 rounded-full bg-[#0F172A] flex items-center justify-center text-sm font-bold text-white shadow-sm">
             {user?.name?.charAt(0).toUpperCase() || 'U'}
           </div>
-          <span suppressHydrationWarning className="text-sm font-medium hidden sm:inline-block text-gray-200">
+          <span suppressHydrationWarning className="text-sm font-semibold hidden sm:inline-block text-[#0f172a]">
             {user?.name || 'User'}
           </span>
-          <button onClick={handleLogout} className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors" title="Logout">
+          <button onClick={handleLogout} className="p-2 hover:bg-[#EFEBE0] rounded-lg text-[#475569] hover:text-[#0f172a] transition-colors" title="Logout">
             <LogOut className="w-4 h-4" />
           </button>
         </div>

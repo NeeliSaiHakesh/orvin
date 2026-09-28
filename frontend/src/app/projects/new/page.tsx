@@ -46,37 +46,37 @@ export default function NewProjectPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 animate-fade-in pt-6">
-      <div>
-        <h1 className="text-3xl font-bold font-heading mb-2">Create New Project</h1>
-        <p className="text-gray-400">Set up your machine learning project workspace.</p>
+    <div className="max-w-2xl mx-auto space-y-8 animate-fade-in pt-6 text-[#0F172A]">
+      <div className="bg-[#FFFDF9] p-6 rounded-3xl border border-[#E2DCD0] shadow-sm">
+        <h1 className="text-3xl font-extrabold font-heading mb-1 text-[#0F172A]">Create New Project</h1>
+        <p className="text-[#475569] text-sm">Set up your automated machine learning project workspace.</p>
       </div>
 
       {error && (
-        <div className="glass border-red-500/30 bg-red-500/10 p-4 rounded-xl text-red-400">{error}</div>
+        <div className="border border-rose-300 bg-rose-50 p-4 rounded-2xl text-rose-900 font-semibold text-sm">{error}</div>
       )}
 
-      <Card glow>
-        <CardHeader>
-          <h3 className="font-bold flex items-center gap-2">
-            <FolderPlus className="w-5 h-5 text-purple-400" /> Project Information
+      <Card>
+        <CardHeader className="border-b border-[#E2DCD0] py-4">
+          <h3 className="font-bold flex items-center gap-2 text-[#0F172A]">
+            <FolderPlus className="w-5 h-5 text-indigo-700" /> Project Configuration
           </h3>
         </CardHeader>
-        <CardBody>
+        <CardBody className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <Input
               label="Project Name *"
-              placeholder="e.g. Customer Churn Prediction"
+              placeholder="e.g. Enterprise Churn & Risk Guard"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
             />
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
+              <label className="block text-xs font-bold text-[#0F172A] uppercase tracking-wider mb-2">Description</label>
               <textarea
                 rows={3}
-                className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors text-sm"
+                className="w-full bg-[#FAF7F0] border border-[#CBD5E1] rounded-xl p-3 text-[#0F172A] placeholder-[#94A3B8] focus:outline-none focus:ring-2 focus:ring-[#0F172A]/20 focus:border-[#0F172A] transition-colors text-sm font-medium"
                 placeholder="Brief description of what this ML project aims to predict..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -85,28 +85,28 @@ export default function NewProjectPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Task Type</label>
+                <label className="block text-xs font-bold text-[#0F172A] uppercase tracking-wider mb-2">Task Type</label>
                 <select
                   value={taskType}
                   onChange={(e) => setTaskType(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white focus:outline-none focus:border-purple-500 transition-colors text-sm"
+                  className="w-full bg-[#FAF7F0] border border-[#CBD5E1] rounded-xl p-3 text-[#0F172A] font-semibold focus:outline-none focus:ring-2 focus:ring-[#0F172A]/20 focus:border-[#0F172A] transition-colors text-sm cursor-pointer"
                 >
-                  <option value="classification" className="bg-gray-900">Classification</option>
-                  <option value="regression" className="bg-gray-900">Regression</option>
+                  <option value="classification" className="bg-[#FFFDF9] text-[#0F172A]">Classification</option>
+                  <option value="regression" className="bg-[#FFFDF9] text-[#0F172A]">Regression</option>
                 </select>
               </div>
 
               <div>
                 <Input
                   label="Target Column (Optional)"
-                  placeholder="e.g. churn, price, label"
+                  placeholder="e.g. churn, price, risk_tier"
                   value={targetColumn}
                   onChange={(e) => setTargetColumn(e.target.value)}
                 />
               </div>
             </div>
 
-            <div className="flex justify-end gap-4 pt-4">
+            <div className="flex justify-end gap-3 pt-4 border-t border-[#E2DCD0]">
               <Button type="button" variant="secondary" onClick={() => router.back()}>
                 Cancel
               </Button>

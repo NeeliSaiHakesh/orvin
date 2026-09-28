@@ -15,11 +15,11 @@ import traceback
 try:
     from app.config import settings
     from app.database import init_db
-    from app.routers import auth, projects, datasets, analysis, cleaning, features, training, explain, api_gen, assistant, decision, simulator, self_healing, cost_carbon, readiness, experiments, version_lineage
+    from app.routers import auth, projects, datasets, analysis, cleaning, features, training, explain, api_gen, assistant, decision, simulator, self_healing, cost_carbon, readiness, experiments, version_lineage, devops_agent
 except (ImportError, ModuleNotFoundError):
     from .config import settings  # type: ignore
     from .database import init_db  # type: ignore
-    from .routers import auth, projects, datasets, analysis, cleaning, features, training, explain, api_gen, assistant, decision, simulator, self_healing, cost_carbon, readiness, experiments, version_lineage  # type: ignore
+    from .routers import auth, projects, datasets, analysis, cleaning, features, training, explain, api_gen, assistant, decision, simulator, self_healing, cost_carbon, readiness, experiments, version_lineage, devops_agent  # type: ignore
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -64,7 +64,7 @@ routers = [
     cleaning.router, features.router, training.router, explain.router,
     api_gen.router, assistant.router, decision.router, simulator.router,
     self_healing.router, cost_carbon.router, readiness.router, experiments.router,
-    version_lineage.router
+    version_lineage.router, devops_agent.router
 ]
 
 for pfx in ["/api/v1", "/api"]:

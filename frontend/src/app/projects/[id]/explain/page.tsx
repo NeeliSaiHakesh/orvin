@@ -10,17 +10,13 @@ import { api } from '@/lib/api';
 
 export default function ExplainPage() {
   const params = useParams();
-  const projectId = params.id as string;
+  const projectId = (params?.id as string) || 'p-101';
   const [explanation, setExplanation] = useState<any>(null);
   const [models, setModels] = useState<any[]>([]);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    loadModels();
-  }, [projectId]);
 
   const fetchExplanation = async (modelId: string) => {
     if (!modelId) return;
@@ -53,9 +49,9 @@ export default function ExplainPage() {
     }
   };
 
-  if (!initialLoading && models.length === 0) {
-    return <NoDatasetGate projectId={projectId} pageName="Explainable AI & SHAP" pageDescription="Understand feature contributions, decision boundaries, and model fairness." requiresModel />;
-  }
+  useEffect(() => {
+    loadModels();
+  }, [projectId]);
 
   const loadExplanation = () => {
     if (selectedModel) {
@@ -63,10 +59,10 @@ export default function ExplainPage() {
     }
   };
 
-  const darkLayout = {
-    paper_bgcolor: 'transparent',
-    plot_bgcolor: 'transparent',
-    font: { color: '#F9FAFB', size: 11 },
+  const lightLayout = {
+    paper_bgcolor: '#FFFDF9',
+    plot_bgcolor: '#FFFDF9',
+    font: { color: '#0F172A', size: 11 },
     margin: { t: 30, b: 40, l: 120, r: 20 },
   };
 
@@ -75,17 +71,21 @@ export default function ExplainPage() {
       ? `Accuracy: ${(m.metrics.accuracy * 100).toFixed(1)}%` 
       : (m.metrics?.r2 ? `R²: ${m.metrics.r2.toFixed(3)}` : (m.metrics?.cv_score ? `CV: ${m.metrics.cv_score.toFixed(3)}` : `Model #${index + 1}`));
     
-    const bestTag = m.is_selected ? ' ⭐ [Best]' : '';
+    const bestTag = m.is_selected ? ' (Best)' : '';
     const shortId = m.id ? `(ID: ${m.id.substring(0, 6)})` : '';
     return `${m.algorithm || 'Algorithm'} — ${metricScore} ${shortId}${bestTag}`;
   };
 
+  if (!initialLoading && models.length === 0) {
+    return <NoDatasetGate projectId={projectId} pageName="Explainable AI & SHAP" pageDescription="Understand feature contributions, decision boundaries, and model fairness." requiresModel />;
+  }
+
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-8 animate-fade-in text-[#0f172a]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#FFFDF9] p-6 rounded-3xl border border-[#E2DCD0] shadow-sm">
         <div>
-          <h1 className="text-3xl font-bold font-heading mb-1">Explainable AI & SHAP</h1>
-          <p className="text-gray-400 text-sm">Understand feature contributions, decision boundaries, and model fairness.</p>
+          <h1 className="text-3xl font-extrabold font-heading mb-1 text-[#0f172a]">Explainable AI & SHAP</h1>
+          <p className="text-[#475569] text-sm">Understand feature contributions, decision boundaries, and model fairness.</p>
         </div>
         
         <div className="flex flex-wrap items-center gap-3">
@@ -97,20 +97,20 @@ export default function ExplainPage() {
                   setSelectedModel(e.target.value);
                   fetchExplanation(e.target.value);
                 }}
-                className="bg-[#0f172a] text-gray-100 border border-purple-500/40 rounded-xl px-4 py-2.5 text-sm font-medium shadow-xl hover:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 appearance-none pr-10 cursor-pointer min-w-[280px]"
+                className="bg-[#FAF7F0] text-[#0f172a] border border-[#E2DCD0] rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm hover:border-[#CBD5E1] focus:outline-none focus:ring-2 focus:ring-[#0f172a]/20 appearance-none pr-10 cursor-pointer min-w-[280px]"
               >
                 {models.map((m: any, idx: number) => (
-                  <option key={m.id || idx} value={m.id} className="bg-[#0f172a] text-gray-100 py-2">
+                  <option key={m.id || idx} value={m.id} className="bg-[#FFFDF9] text-[#0f172a] py-2">
                     {getModelLabel(m, idx)}
                   </option>
                 ))}
               </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-purple-400">
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#64748b]">
                 ▼
               </div>
             </div>
           ) : (
-            <span className="text-xs text-gray-500 font-mono bg-white/5 border border-white/10 px-3 py-2 rounded-xl">
+            <span className="text-xs text-[#64748b] font-mono bg-[#FAF7F0] border border-[#E2DCD0] px-3 py-2 rounded-xl">
               No trained models available
             </span>
           )}
@@ -121,14 +121,14 @@ export default function ExplainPage() {
         </div>
       </div>
 
-      {error && <div className="glass border-red-500/30 bg-red-500/10 p-4 rounded-xl text-red-400">{error}</div>}
+      {error && <div className="border border-rose-300 bg-rose-50 p-4 rounded-2xl text-rose-900 font-semibold text-sm">{error}</div>}
 
       {!explanation && !loading && (
         <Card>
           <CardBody className="text-center py-16">
-            <BrainCircuit className="w-16 h-16 mx-auto mb-4 text-gray-600" />
-            <p className="text-lg text-gray-400">No explanation generated yet</p>
-            <p className="text-sm text-gray-500 mt-1">Select a trained model and click &quot;Explain Model&quot;</p>
+            <BrainCircuit className="w-16 h-16 mx-auto mb-4 text-[#94a3b8]" />
+            <p className="text-lg font-bold text-[#0f172a]">No explanation generated yet</p>
+            <p className="text-sm text-[#475569] mt-1">Select a trained model and click &quot;Explain Model&quot;</p>
           </CardBody>
         </Card>
       )}
@@ -137,12 +137,12 @@ export default function ExplainPage() {
         <>
           {/* Feature Importance */}
           {explanation.feature_importance_chart?.plotly && (
-            <Card glow>
-              <CardHeader><h3 className="font-bold flex items-center gap-2"><BarChart3 className="w-5 h-5 text-purple-400" /> Feature Importance (SHAP)</h3></CardHeader>
+            <Card>
+              <CardHeader><h3 className="font-bold flex items-center gap-2 text-[#0f172a]"><BarChart3 className="w-5 h-5 text-indigo-700" /> Feature Importance (SHAP)</h3></CardHeader>
               <CardBody className="h-[400px]">
                 <Plot
                   data={explanation.feature_importance_chart.plotly.data}
-                  layout={{ ...explanation.feature_importance_chart.plotly.layout, ...darkLayout }}
+                  layout={{ ...explanation.feature_importance_chart.plotly.layout, ...lightLayout }}
                   useResizeHandler style={{ width: '100%', height: '100%' }}
                   config={{ displayModeBar: false }}
                 />
@@ -154,11 +154,11 @@ export default function ExplainPage() {
             {/* Confusion Matrix */}
             {explanation.confusion_matrix?.plotly && (
               <Card>
-                <CardHeader><h3 className="font-bold">Confusion Matrix</h3></CardHeader>
+                <CardHeader><h3 className="font-bold text-[#0f172a]">Confusion Matrix</h3></CardHeader>
                 <CardBody className="h-[350px]">
                   <Plot
                     data={explanation.confusion_matrix.plotly.data}
-                    layout={{ ...explanation.confusion_matrix.plotly.layout, ...darkLayout, margin: { ...darkLayout.margin, l: 50 } }}
+                    layout={{ ...explanation.confusion_matrix.plotly.layout, ...lightLayout, margin: { ...lightLayout.margin, l: 50 } }}
                     useResizeHandler style={{ width: '100%', height: '100%' }}
                     config={{ displayModeBar: false }}
                   />
@@ -169,26 +169,11 @@ export default function ExplainPage() {
             {/* ROC Curve */}
             {explanation.roc_curve?.plotly && (
               <Card>
-                <CardHeader><h3 className="font-bold">ROC Curve</h3></CardHeader>
+                <CardHeader><h3 className="font-bold text-[#0f172a]">ROC Curve</h3></CardHeader>
                 <CardBody className="h-[350px]">
                   <Plot
                     data={explanation.roc_curve.plotly.data}
-                    layout={{ ...explanation.roc_curve.plotly.layout, ...darkLayout, margin: { ...darkLayout.margin, l: 50 } }}
-                    useResizeHandler style={{ width: '100%', height: '100%' }}
-                    config={{ displayModeBar: false }}
-                  />
-                </CardBody>
-              </Card>
-            )}
-
-            {/* Precision-Recall Curve */}
-            {explanation.precision_recall?.plotly && (
-              <Card>
-                <CardHeader><h3 className="font-bold">Precision-Recall Curve</h3></CardHeader>
-                <CardBody className="h-[350px]">
-                  <Plot
-                    data={explanation.precision_recall.plotly.data}
-                    layout={{ ...explanation.precision_recall.plotly.layout, ...darkLayout, margin: { ...darkLayout.margin, l: 50 } }}
+                    layout={{ ...explanation.roc_curve.plotly.layout, ...lightLayout, margin: { ...lightLayout.margin, l: 50 } }}
                     useResizeHandler style={{ width: '100%', height: '100%' }}
                     config={{ displayModeBar: false }}
                   />
@@ -199,41 +184,14 @@ export default function ExplainPage() {
 
           {/* AI Explanation */}
           {explanation.ai_explanation && (
-            <Card glow>
-              <CardBody className="flex gap-4 items-start bg-gradient-to-r from-purple-900/20 to-cyan-900/20">
-                <div className="p-3 bg-purple-500/20 rounded-full shrink-0">
-                  <BrainCircuit className="w-6 h-6 text-purple-400" />
+            <Card>
+              <CardBody className="flex gap-4 items-start bg-[#FAF7F0] rounded-2xl">
+                <div className="p-3 bg-[#E2DCD0] rounded-xl shrink-0 text-[#0f172a]">
+                  <BrainCircuit className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-bold mb-2">AI Model Explanation</h3>
-                  <p className="text-gray-300 text-sm leading-relaxed">{explanation.ai_explanation}</p>
-                </div>
-              </CardBody>
-            </Card>
-          )}
-
-          {/* Feature Importance Table */}
-          {explanation.feature_importance && Object.keys(explanation.feature_importance).length > 0 && (
-            <Card>
-              <CardHeader><h3 className="font-bold">Feature Importance Rankings</h3></CardHeader>
-              <CardBody>
-                <div className="space-y-2">
-                  {Object.entries(explanation.feature_importance).slice(0, 15).map(([feature, importance]: [string, any], i) => {
-                    const topVal = Number((Object.values(explanation.feature_importance) as any[])[0]) || 1;
-                    const val = Number(importance) || 0;
-                    const widthPct = Math.min(100, Math.max(0, (val / topVal) * 100));
-                    return (
-                      <div key={feature} className="flex items-center gap-3 py-1">
-                        <span className="text-xs text-gray-500 w-6">{i + 1}</span>
-                        <span className="text-sm truncate flex-1">{feature}</span>
-                        <div className="w-48 bg-white/10 rounded-full h-2 overflow-hidden">
-                          <div className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-cyan-500"
-                            style={{ width: `${widthPct}%` }} />
-                        </div>
-                        <span className="text-xs text-gray-400 w-16 text-right">{typeof importance === 'number' ? importance.toFixed(4) : String(importance)}</span>
-                      </div>
-                    );
-                  })}
+                  <h3 className="font-bold mb-1 text-[#0f172a]">AI Model Explanation</h3>
+                  <p className="text-[#334155] text-sm leading-relaxed">{explanation.ai_explanation}</p>
                 </div>
               </CardBody>
             </Card>
